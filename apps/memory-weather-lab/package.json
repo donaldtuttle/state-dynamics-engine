@@ -1,0 +1,31 @@
+{
+  "name": "@state-dynamics-engine/memory-weather-lab",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Alternative React interface to the Memory Weather engine.",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "node --experimental-strip-types --test tests/*.test.ts",
+    "sync-engine": "node scripts/sync-engine.mjs",
+    "sync-engine:check": "node scripts/sync-engine.mjs --check",
+    "verify": "npm run sync-engine:check && npm test && npm run build"
+  },
+  "dependencies": {
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "zustand": "^5.0.8"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^5.2.0",
+    "typescript": "5.9.3",
+    "vite": "8.2.2"
+  }
+}

@@ -1,0 +1,23 @@
+name: Verify
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: '22.12.0'
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            apps/simulator/package-lock.json
+            apps/memory-weather-lab/package-lock.json
+      - run: npm ci
+      - run: npm run install:apps
+      - run: npm run verify
+      - run: npm run build:site
+      - name: Generated files are current
+        run: git diff --exit-code -- apps/memory-weather apps/memory-weather-lab/src/vendor

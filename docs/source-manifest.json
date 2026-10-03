@@ -1,0 +1,70 @@
+{
+  "sourceRepository": "https://github.com/donaldtuttle/qoft-calculus",
+  "sourceCommit": "1ab947e0cb75afaf0e7ecad11a8aa5e02b510ebc",
+  "files": [
+    {
+      "path": "apps/memory-weather/src/app.js",
+      "sha256": "44a9e05566204531a59eb6382ba7b16cabb0361a89a067a840abcc282a31c32d"
+    },
+    {
+      "path": "apps/memory-weather/src/engine.js",
+      "sha256": "e559a8c187dd05403468d06520980dcd579179af31720ca26c7328a6801b1825"
+    },
+    {
+      "path": "apps/memory-weather/src/field.js",
+      "sha256": "c78f05dfdc69eb29a1e623086ea340053edefb8494e2cc9e68e914eb10ab37cf"
+    },
+    {
+      "path": "apps/memory-weather/src/math.js",
+      "sha256": "25434d2b49e23dd365c333ef6aefe1e82bc3f333c1532227d365af36b7104c8d"
+    },
+    {
+      "path": "apps/memory-weather/src/projection.js",
+      "sha256": "0541aa1ad0c9224628116a9cabfe887d2d37c634471f34e69afd404a0a1ea1f8"
+    },
+    {
+      "path": "apps/memory-weather/src/renderer.js",
+      "sha256": "181f825690c8bb7303624fc24f15cc28c6078e3ab83dd8fc68fa253ed1386874"
+    },
+    {
+      "path": "apps/memory-weather-lab/src/keyboard.ts",
+      "sha256": "a2c04424b6df42a1566898129935fac6a7a04869908f05343e8a12fdf044c83b"
+    },
+    {
+      "path": "apps/memory-weather-lab/src/store.ts",
+      "sha256": "4bb196d1157c3f82e20fd8dbcf44a879ad1a5bb088d48e7a7aa6e4069fb99ac9"
+    },
+    {
+      "path": "apps/memory-weather-lab/src/vendor.d.ts",
+      "sha256": "d9820600c12ffd2136b556c37ca1b3953e6c53e34af85de5589bb73679e7e3eb"
+    },
+    {
+      "path": "apps/simulator/src/compliance.ts",
+      "sha256": "0166b2dc0bbd4d89005e329f1680104b2feed22dba499edfac6145d39f197983"
+    },
+    {
+      "path": "apps/simulator/src/main.ts",
+      "sha256": "c64eb2554376bed8696ec3645458b95cbae67dba4a06fcdb96051016992ff11b"
+    },
+    {
+      "path": "apps/simulator/src/probe-runtime.ts",
+      "sha256": "44f24744603a754cbf4a6c62581c2939e53e0b4fd316ab7fb7c5bdfc4bfb408a"
+    },
+    {
+      "path": "apps/simulator/src/probe.ts",
+      "sha256": "93a11bfd0cea4b57b0a8826c223a9dd14f8b965e038b08af311f71c6fcd6ef1f"
+    },
+    {
+      "path": "apps/simulator/src/session.ts",
+      "sha256": "51e6523b9ec50250a5bf6c909f96d38909625a002086763f993f9d0cd709f829"
+    },
+    {
+      "path": "apps/simulator/src/visualizer.ts",
+      "sha256": "6d47ebf39730e94e353daea2f2eed3b3869e0b08b9ec37d79125af44ac5350c8"
+    },
+    {
+      "path": "src/engine.ts",
+      "sha256": "4fe4f3da4eadb24347131a711985de4d211d6af333dcc4b5e9d2c5e9d2a970ee"
+    }
+  ]
+}

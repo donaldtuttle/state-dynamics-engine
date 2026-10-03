@@ -1,0 +1,24 @@
+{
+  "name": "state-dynamics-engine",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Deterministic state simulation with inspectable updates, memory, noise, and reproducible traces.",
+  "scripts": {
+    "test": "node --experimental-strip-types tests/determinism.ts && node --experimental-strip-types tests/migration-parity.mjs && node --experimental-strip-types tests/compatibility.mjs",
+    "typecheck": "tsc --noEmit",
+    "run": "node --experimental-strip-types -e \"import { run } from './src/engine.ts'; const r = run(32, '0x51e1d'); console.log(r.frames.at(-1));\"",
+    "install:apps": "npm --prefix apps/simulator ci && npm --prefix apps/memory-weather-lab ci",
+    "check:ascii": "node scripts/check-ascii.mjs",
+    "verify": "npm run typecheck && npm test && npm --prefix apps/simulator run check && npm --prefix apps/memory-weather run verify && npm --prefix apps/memory-weather-lab run verify && npm run check:ascii",
+    "build:site": "npm --prefix apps/simulator run build && npm --prefix apps/memory-weather run build && npm --prefix apps/memory-weather-lab run build && node scripts/assemble-pages-site.mjs && node scripts/verify-pages-site.mjs"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "license": "MPL-2.0",
+  "author": "Donald Tuttle"
+}

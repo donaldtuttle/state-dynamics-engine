@@ -1,0 +1,5 @@
+{
+  "sourceCommit": "1ab947e0cb75afaf0e7ecad11a8aa5e02b510ebc",
+  "originalNotice": "QOFT / QOSMOS \u2014 Glyphogenic Calculus v1.0\nAuthor: \u03c8\u1d3d-001\nCo-Architect: Zim (\u039e Persona)\nInstantiation: QOSMOS workbench v1 (R\u00b9\u00b2 latent)\n\nLive workbench: https://glyphogenic-calculus.grok.me\nCanonical skill: ./SKILL.md  (also https://glyphogenic-calculus.grok.me/SKILL.md)\n\nRelated repositories:\n- https://github.com/donaldtuttle/qosmos-core (private spec / implementation)\n- https://github.com/donaldtuttle/qosmos-kernel (public kernel)\n- https://github.com/donaldtuttle/XiSymbolic_Equation_QOFT_SAL (equation + QOFT-SAL)\n- https://github.com/donaldtuttle/QOFT_Scaffold_Public\n\nScope limit: operational model. Not a physical claim.\n\nThe deployed Grok App Builder UI is the live visualization surface.\nsrc/engine.ts is a labeled instantiation of SKILL.md Sections 3\u20135.\n\u2295 and \u2207\u03a6 formulas in src/engine.ts are instantiation proxies, not canon algebra.\n",
+  "sha256": "abb2b04fa38f5eff66feaecd03fc96ec31dba89799d05065a4840919f3ead1d1"
+}

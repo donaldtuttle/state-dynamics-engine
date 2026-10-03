@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#071019">
+  <meta name="description" content="Deterministic R12 state-dynamics instrument with memory-conditioned updates, auditable telemetry, and projection provenance.">
+  <title>Memory Weather</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#viewport">Skip to viewport</a>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand" aria-label="Memory Weather">
+        <span class="brand-mark" aria-hidden="true">MW</span>
+        <span>
+          <strong>Memory Weather</strong>
+          <small>12D state-dynamics instrument</small>
+        </span>
+      </div>
+      <div class="status-strip">
+        <span class="status-chip develop">Experimental</span>
+        <span class="status-chip">package 0.1.0</span>
+        <span class="status-chip live" id="runStatus">paused</span>
+      </div>
+      <div class="transport" aria-label="Simulation transport">
+        <button id="runBtn" class="primary" type="button" aria-pressed="false"><span aria-hidden="true">&gt;</span> Run</button>
+        <button id="stepBtn" type="button"><span aria-hidden="true">></span> Step</button>
+        <button id="resetBtn" type="button"><span aria-hidden="true">repeat</span> Reset</button>
+        <label class="compact-control">Speed
+          <select id="speedSelect">
+            <option value="180">slow</option>
+            <option value="80" selected>normal</option>
+            <option value="28">fast</option>
+          </select>
+        </label>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <aside class="panel left-panel" aria-label="Layers and simulation controls">
+        <section>
+          <div class="section-heading">
+            <div><span class="eyebrow">Live measurements</span><h2>Step diagnostics</h2></div>
+            <span class="source-badge direct">direct</span>
+          </div>
+          <div class="meter-grid">
+            <article class="meter"><span>Coherence score</span><strong id="coherenceValue">0.420</strong><i><b id="coherenceBar"></b></i></article>
+            <article class="meter"><span>Input strength</span><strong id="inputValue">0.000</strong><i><b id="inputBar"></b></i></article>
+            <article class="meter"><span>Update magnitude</span><strong id="updateValue">0.000</strong><i><b id="updateBar"></b></i></article>
+            <article class="meter"><span>Smoothed-state alignment</span><strong id="smoothingValue">1.000</strong><i><b id="smoothingBar"></b></i></article>
+          </div>
+          <div class="weather-callout">
+            <span class="weather-symbol" aria-hidden="true">o</span>
+            <div>
+              <strong id="weatherLabel">No measured regime</strong>
+              <small id="weatherRationale">No committed simulation tick is available yet.</small>
+              <small class="weather-alias" id="weatherAlias">Weather alias: Unformed field</small>
+            </div>
+            <span class="source-badge derived">regime view</span>
+          </div>
+        </section>
+
+        <section>
+          <div class="section-heading"><div><span class="eyebrow">Viewport</span><h2>Measured layers</h2></div></div>
+          <label class="select-row">Scalar channel
+            <select id="scalarSelect">
+              <option value="weather">Regime composite</option>
+              <option value="potential">Attractor potential</option>
+              <option value="coherenceScore">Coherence score</option>
+              <option value="fronts">Update fronts</option>
+              <option value="memoryInfluence">Memory influence</option>
+              <option value="projectionReadiness">Basin projection readiness</option>
+              <option value="separation">State-to-smoothed distance</option>
+            </select>
+          </label>
+          <div class="toggle-grid" id="layerControls">
+            <label><input type="checkbox" data-layer="scalar" checked><span>Scalar regime map</span></label>
+            <label><input type="checkbox" data-layer="vectors" checked><span>Update vectors</span></label>
+            <label><input type="checkbox" data-layer="streamlines" checked><span>Streamlines</span></label>
+            <label><input type="checkbox" data-layer="trace" checked><span>State trace</span></label>
+            <label><input type="checkbox" data-layer="smoothed" checked><span>State-to-smoothed distance</span></label>
+            <label><input type="checkbox" data-layer="basins" checked><span>Attractor regions</span></label>
+            <label><input type="checkbox" data-layer="projection" checked><span>Projection boundary</span></label>
+            <label><input type="checkbox" data-layer="memory" checked><span>Memory replay links</span></label>
+            <label><input type="checkbox" data-layer="events" checked><span>Recorded events</span></label>
+            <label><input type="checkbox" data-layer="grid" checked><span>Projection grid</span></label>
+          </div>
+        </section>
+
+        <section>
+          <div class="section-heading"><div><span class="eyebrow">Observation</span><h2>Input strength</h2></div></div>
+          <label class="select-row">Preset
+            <select id="stimulusSelect">
+              <option value="quiet">Quiet</option>
+              <option value="align">Align</option>
+              <option value="disrupt">Disrupt</option>
+              <option value="pulse">Pulse</option>
+              <option value="periodic" selected>Periodic</option>
+              <option value="basin">Selected basin</option>
+            </select>
+          </label>
+          <label class="range-row"><span>Amplitude <output id="amplitudeOutput">0.82</output></span><input id="amplitudeRange" type="range" min="0" max="2" step="0.01" value="0.82"></label>
+          <label class="select-row">Attractor target
+            <select id="basinSelect">
+              <option value="0">Basin 1</option><option value="1" selected>Basin 2</option><option value="2">Basin 3</option>
+              <option value="3">Basin 4</option><option value="4">Basin 5</option><option value="5">Basin 6</option>
+            </select>
+          </label>
+          <p class="fine-print">Click the 2D viewport to supply an explicit forcing target. Ten hidden components receive no invented information.</p>
+        </section>
+
+        <section>
+          <div class="section-heading"><div><span class="eyebrow">Experimental coupling</span><h2>Coupled simulations</h2></div><span class="source-badge derived">local</span></div>
+          <label class="switch-row"><input id="peerToggle" type="checkbox"><span>Enable instance B</span></label>
+          <label class="range-row"><span>Coupling <output id="couplingOutput">0.14</output></span><input id="couplingRange" type="range" min="0" max="0.5" step="0.01" value="0.14"></label>
+          <p class="fine-print">Each instance keeps its own state, input, memory, projection policy, and diagnostics. Coupling uses a frozen prior-state snapshot so processing order cannot steer the result.</p>
+        </section>
+
+        <section>
+          <details>
+            <summary>Mechanisms</summary>
+            <div class="toggle-grid mechanisms" id="ablationControls">
+              <label><input type="checkbox" data-ablation="projection" checked><span>Basin projection</span></label>
+              <label><input type="checkbox" data-ablation="memoryWrite" checked><span>Memory writing</span></label>
+              <label><input type="checkbox" data-ablation="memoryReplay" checked><span>Memory replay</span></label>
+              <label><input type="checkbox" data-ablation="summaries" checked><span>History summaries</span></label>
+              <label><input type="checkbox" data-ablation="noise" checked><span>Adaptive noise</span></label>
+              <label><input type="checkbox" data-ablation="coherenceGate" checked><span>Coherence gate</span></label>
+              <label><input type="checkbox" data-ablation="smoothing" checked><span>State smoothing</span></label>
+            </div>
+          </details>
+        </section>
+      </aside>
+
+      <section class="center-stage">
+        <div class="viewport-toolbar">
+          <div class="segmented" role="group" aria-label="Viewport mode">
+            <button type="button" class="active" data-view="weather" aria-pressed="true">Regime Map</button>
+            <button type="button" data-view="field" aria-pressed="false">2D Field</button>
+            <button type="button" data-view="terrain" aria-pressed="false">3D Terrain</button>
+          </div>
+          <div class="viewport-meta">
+            <span id="projectionMode">fixed 2x12 projection</span>
+            <span id="frameRate">0 fps</span>
+          </div>
+        </div>
+        <div class="viewport-wrap" id="viewport">
+          <canvas id="fieldCanvas" tabindex="0" role="img" aria-label="Memory Weather regime viewport. No measured simulation tick is available yet."></canvas>
+          <div class="canvas-legend" aria-hidden="true"><span>low</span><i></i><span>high</span></div>
+          <div class="selection-readout" id="selectionReadout" hidden></div>
+        </div>
+        <div class="repro-bar" aria-label="Reproducibility identifiers">
+          <span><small>tick</small><b id="tickValue">0</b></span>
+          <span><small>phase</small><b id="phaseValue">0</b></span>
+          <span><small>state hash</small><b id="stateHash"> - </b></span>
+          <span><small>projection</small><b id="projectionHash"> - </b></span>
+          <span><small>field</small><b id="fieldHash"> - </b></span>
+        </div>
+        <section class="event-rail" aria-labelledby="eventTitle">
+          <div class="section-heading rail-heading">
+            <div><span class="eyebrow">Committed artifacts</span><h2 id="eventTitle">Event rail</h2></div>
+            <div class="rail-counts"><span id="projectionCount">0 basin projections</span><span id="memoryCount">0 memory records</span><span id="summaryCount">0 history summaries</span></div>
+          </div>
+          <div class="timeline" id="timeline"><p class="empty-state">Run the engine or inscribe a memory to create auditable events.</p></div>
+        </section>
+      </section>
+
+      <aside class="panel right-panel" aria-label="Memory and provenance inspector">
+        <section>
+          <div class="section-heading"><div><span class="eyebrow">Local artifacts</span><h2>Memory</h2></div><span class="source-badge derived">implementation</span></div>
+          <label class="sr-only" for="memoryInput">Memory label or recall query</label>
+          <input id="memoryInput" type="text" maxlength="120" value="observer field" placeholder="Memory label or recall query" autocomplete="off">
+          <label class="range-row"><span>Event weight <output id="weightOutput">1.00</output></span><input id="weightRange" type="range" min="0.1" max="2" step="0.05" value="1"></label>
+          <div class="button-row">
+            <button id="inscribeBtn" class="primary" type="button">Record memory</button>
+            <button id="recallBtn" type="button">Queue replay</button>
+          </div>
+          <button id="projectionBtn" class="full-width warning" type="button">Request basin projection</button>
+          <ul class="memory-list" id="memoryList"><li class="empty-state">No inscriptions yet. History summary summaries remain a separate mechanism.</li></ul>
+        </section>
+
+        <section class="inspector-section">
+          <div class="section-heading"><div><span class="eyebrow">Evidence chain</span><h2>Projection provenance</h2></div><span class="source-badge">auditable</span></div>
+          <label class="select-row">Feature
+            <select id="featureSelect"></select>
+          </label>
+          <div class="provenance-card" id="provenanceCard"></div>
+        </section>
+
+        <section>
+          <div class="section-heading"><div><span class="eyebrow">Replay</span><h2>Seed & files</h2></div></div>
+          <label class="select-row">Seed
+            <input id="seedInput" type="number" min="0" max="4294967295" step="1" value="12062026">
+          </label>
+          <div class="button-row">
+            <button id="exportBtn" type="button">Export replay</button>
+            <button id="csvBtn" type="button">Telemetry CSV</button>
+          </div>
+          <button id="demoBtn" class="full-width" type="button">Load fixed-seed demo</button>
+          <button id="importBtn" class="full-width" type="button">Import replay JSON</button>
+          <input id="importFile" type="file" accept="application/json,.json" hidden>
+          <p class="fine-print">Files stay local. Imported text is parsed as data and never executed.</p>
+        </section>
+
+        <section class="scope-card">
+          <span class="eyebrow">Scope firewall</span>
+          <p>This is a deterministic hybrid state-space and associative-memory implementation. The viewport is not evidence of physics, quantum behavior, or consciousness.</p>
+          <p class="fine-print">Implementation details: docs/IMPLEMENTATION.md in the repository.</p>
+        </section>
+      </aside>
+    </main>
+  </div>
+
+  <div id="liveRegion" class="sr-only" aria-live="polite"></div>
+  <div id="toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="src/math.js"></script>
+  <script src="src/engine.js"></script>
+  <script src="src/projection.js"></script>
+  <script src="src/field.js"></script>
+  <script src="src/renderer.js"></script>
+  <script src="src/app.js"></script>
+</body>
+</html>

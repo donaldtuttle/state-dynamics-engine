@@ -1,0 +1,16 @@
+{
+  "name": "@state-dynamics-engine/memory-weather",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Memory Weather: a separate experimental state simulation.",
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "check": "node --check src/math.js && node --check src/engine.js && node --check src/projection.js && node --check src/field.js && node --check src/renderer.js && node --check src/app.js",
+    "build": "node scripts/generate-demo.js && node scripts/build-standalone.js",
+    "manifest": "node scripts/generate-manifest.js",
+    "verify": "npm run check && npm test && npm run build && npm run manifest"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

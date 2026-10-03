@@ -1,0 +1,16 @@
+State Dynamics Engine
+Copyright 2026 Donald Tuttle
+Licensed under the Mozilla Public License 2.0.
+
+Derived from QOFT / QOSMOS - Glyphogenic Calculus v1.0 and its later
+qoft-calculus implementation at commit:
+1ab947e0cb75afaf0e7ecad11a8aa5e02b510ebc
+https://github.com/donaldtuttle/qoft-calculus
+
+Original credits: author identifier psi-reflex-001; co-architect Zim
+(Xi Persona). The complete original NOTICE, including its original
+Unicode spelling and scope statements, is preserved losslessly in
+docs/upstream-notice.json. See ORIGINS.md for reconstruction and provenance.
+
+This successor changes naming, interfaces, documentation, and schemas.
+It makes implementation-specific software claims only.

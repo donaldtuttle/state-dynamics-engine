@@ -1,0 +1,17 @@
+import { cpSync, copyFileSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { resolve } from 'node:path';
+const root = fileURLToPath(new URL('../', import.meta.url)), site = resolve(root, '_site');
+rmSync(site, { force: true, recursive: true });
+mkdirSync(site, { recursive: true });
+for (const route of ['apps', 'memory-weather', 'docs']) mkdirSync(resolve(site, route));
+cpSync(resolve(root, 'apps/simulator/dist'), resolve(site, 'simulator'), { recursive: true });
+cpSync(resolve(root, 'apps/memory-weather-lab/dist'), resolve(site, 'memory-weather-lab'), { recursive: true });
+copyFileSync(resolve(root, 'apps/memory-weather/dist/memory-weather.html'), resolve(site, 'memory-weather/index.html'));
+const launcher = readFileSync(resolve(root, 'apps/index.html'), 'utf8');
+writeFileSync(resolve(site, 'apps/index.html'), launcher);
+writeFileSync(resolve(site, 'index.html'), launcher.replaceAll('href="../', 'href="./'));
+for (const file of ['IMPLEMENTATION.md', 'MIGRATION.md']) copyFileSync(resolve(root, 'docs', file), resolve(site, 'docs', file));
+writeFileSync(resolve(site, '.nojekyll'), '');
+writeFileSync(resolve(site, 'site-manifest.json'), JSON.stringify({ schemaVersion: 'state-dynamics-site/v1', routes: ['/', '/apps/', '/simulator/', '/simulator/probe.html', '/memory-weather/', '/memory-weather-lab/'] }, null, 2)+'\n');
+console.log('Built _site with project launcher and four interfaces.');

@@ -1,0 +1,3531 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#071019">
+  <meta name="description" content="Deterministic R12 state-dynamics instrument with memory-conditioned updates, auditable telemetry, and projection provenance.">
+  <title>Memory Weather  /  Standalone</title>
+  <style>
+:root {
+  color-scheme: dark;
+  --bg: #050b12;
+  --surface: #0a131d;
+  --surface-2: #0d1823;
+  --surface-3: #111e2a;
+  --line: rgba(180, 211, 211, 0.14);
+  --line-strong: rgba(180, 211, 211, 0.25);
+  --ink: #dfeeea;
+  --muted: #88a09f;
+  --dim: #5e7477;
+  --teal: #91d7ca;
+  --teal-strong: #b8efe2;
+  --amber: #efbd73;
+  --orange: #ff8b5e;
+  --blue: #69a9d4;
+  --radius: 14px;
+  --shadow: 0 18px 55px rgba(0, 0, 0, 0.24);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-synthesis: none;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--ink); }
+body { min-width: 320px; }
+button, input, select { font: inherit; }
+button, select, input[type="text"], input[type="number"] {
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface-3);
+  color: var(--ink);
+}
+button {
+  min-height: 38px;
+  padding: 0.55rem 0.78rem;
+  cursor: pointer;
+  transition: border-color 140ms ease, background 140ms ease, transform 140ms ease;
+}
+button:hover { border-color: var(--line-strong); background: #142432; }
+button:active { transform: translateY(1px); }
+button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible, canvas:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
+}
+button.primary { background: var(--teal); border-color: transparent; color: #07110f; font-weight: 700; }
+button.primary:hover { background: var(--teal-strong); }
+button.warning { color: #ffd4c0; border-color: rgba(255, 139, 94, 0.3); }
+button[disabled] { cursor: not-allowed; opacity: 0.48; }
+a { color: var(--teal); }
+h1, h2, p { margin-top: 0; }
+h2 { margin: 0; font-size: 0.98rem; font-weight: 640; letter-spacing: -0.01em; }
+small { color: var(--muted); }
+
+.skip-link {
+  position: fixed; z-index: 100; left: 1rem; top: -5rem; padding: 0.7rem 1rem;
+  background: var(--teal); color: #07110f; border-radius: 8px;
+}
+.skip-link:focus { top: 1rem; }
+.sr-only {
+  position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+
+.shell { min-height: 100vh; display: grid; grid-template-rows: auto 1fr; }
+.topbar {
+  min-height: 70px; padding: 0.7rem 1rem; display: grid; grid-template-columns: minmax(220px, 1fr) auto minmax(390px, 1fr);
+  align-items: center; gap: 1rem; border-bottom: 1px solid var(--line); background: rgba(5, 11, 18, 0.96);
+  position: sticky; top: 0; z-index: 10; backdrop-filter: blur(12px);
+}
+.brand { display: flex; align-items: center; gap: 0.72rem; min-width: 0; }
+.brand-mark {
+  width: 40px; height: 40px; display: grid; place-items: center; border: 1px solid rgba(145, 215, 202, 0.28);
+  border-radius: 11px; color: var(--teal); background: rgba(145, 215, 202, 0.07); font: 1.25rem Georgia, serif;
+}
+.brand strong { display: block; font: 1.18rem Georgia, "Times New Roman", serif; letter-spacing: -0.02em; }
+.brand small { display: block; margin-top: 0.1rem; font-size: 0.7rem; letter-spacing: 0.04em; text-transform: uppercase; }
+.status-strip { display: flex; justify-content: center; flex-wrap: wrap; gap: 0.35rem; }
+.status-chip, .source-badge {
+  display: inline-flex; align-items: center; min-height: 23px; padding: 0.16rem 0.48rem; border: 1px solid var(--line);
+  border-radius: 99px; color: var(--muted); background: rgba(255, 255, 255, 0.025); font-size: 0.65rem; line-height: 1;
+  letter-spacing: 0.07em; text-transform: uppercase; white-space: nowrap;
+}
+.status-chip.develop { color: var(--amber); border-color: rgba(239, 189, 115, 0.28); }
+.status-chip.live.running { color: var(--teal-strong); border-color: rgba(145, 215, 202, 0.4); }
+.source-badge.direct { color: var(--teal); }
+.source-badge.derived { color: var(--blue); }
+.source-badge.interpretive { color: var(--amber); }
+.transport { justify-self: end; display: flex; align-items: center; justify-content: flex-end; gap: 0.42rem; }
+.compact-control { display: flex; align-items: center; gap: 0.4rem; color: var(--muted); font-size: 0.74rem; }
+.compact-control select { min-height: 37px; padding: 0 1.8rem 0 0.55rem; }
+
+.workspace {
+  display: grid; grid-template-columns: minmax(220px, 260px) minmax(470px, 1fr) minmax(270px, 330px);
+  gap: 0.72rem; min-height: 0; padding: 0.72rem; height: calc(100vh - 70px);
+}
+.panel, .center-stage { min-width: 0; min-height: 0; }
+.panel {
+  overflow: auto; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow);
+}
+.panel section { padding: 1rem; border-bottom: 1px solid var(--line); }
+.panel section:last-child { border-bottom: 0; }
+.section-heading { display: flex; justify-content: space-between; align-items: center; gap: 0.7rem; margin-bottom: 0.85rem; }
+.eyebrow { display: block; margin-bottom: 0.22rem; color: var(--dim); font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase; }
+.meter-grid { display: grid; gap: 0.66rem; }
+.meter { display: grid; grid-template-columns: 1fr auto; gap: 0.32rem 0.7rem; }
+.meter span { color: var(--muted); font-size: 0.73rem; }
+.meter strong { font: 0.74rem ui-monospace, SFMono-Regular, Menlo, monospace; font-weight: 500; }
+.meter i { grid-column: 1 / -1; height: 3px; overflow: hidden; border-radius: 99px; background: #172530; }
+.meter i b { display: block; width: 0; height: 100%; background: linear-gradient(90deg, var(--blue), var(--teal)); transition: width 160ms linear; }
+.weather-callout { margin-top: 1rem; padding: 0.72rem; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.55rem; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2); }
+.weather-symbol { color: var(--amber); font-size: 1.45rem; }
+.weather-callout strong, .weather-callout small { display: block; }
+.weather-callout strong { font-size: 0.78rem; }
+.weather-callout small { margin-top: 0.12rem; font-size: 0.64rem; line-height: 1.25; }
+.weather-callout .weather-alias { color: var(--dim); font-size: 0.59rem; letter-spacing: 0.02em; }
+
+.select-row, .range-row { display: grid; gap: 0.42rem; color: var(--muted); font-size: 0.72rem; }
+.select-row + .select-row, .select-row + .range-row, .range-row + .select-row, .range-row + .button-row { margin-top: 0.72rem; }
+.select-row select, .select-row input, input[type="text"] { width: 100%; min-height: 40px; padding: 0.55rem 0.65rem; }
+.range-row > span { display: flex; justify-content: space-between; gap: 1rem; }
+.range-row output { color: var(--ink); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+input[type="range"] { width: 100%; accent-color: var(--teal); }
+.toggle-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.36rem; }
+.toggle-grid label { min-width: 0; display: flex; align-items: center; gap: 0.42rem; color: var(--muted); font-size: 0.68rem; }
+.toggle-grid input { accent-color: var(--teal); }
+.switch-row { min-height: 38px; display: flex; align-items: center; gap: 0.5rem; color: var(--muted); font-size: 0.72rem; }
+.switch-row input { accent-color: var(--blue); }
+.switch-row + .range-row { margin-top: 0.62rem; }
+.fine-print { margin: 0.75rem 0 0; color: var(--dim); font-size: 0.67rem; line-height: 1.45; }
+details summary { cursor: pointer; color: var(--muted); font-size: 0.76rem; }
+details[open] summary { margin-bottom: 0.75rem; color: var(--ink); }
+.mechanisms { grid-template-columns: 1fr; }
+
+.center-stage { display: grid; grid-template-rows: auto minmax(330px, 1fr) auto minmax(134px, 0.28fr); gap: 0.62rem; }
+.viewport-toolbar, .repro-bar, .event-rail {
+  border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow);
+}
+.viewport-toolbar { padding: 0.48rem; display: flex; justify-content: space-between; align-items: center; gap: 0.8rem; }
+.segmented { display: inline-flex; gap: 0.2rem; padding: 0.2rem; border-radius: 10px; background: #071019; }
+.segmented button { min-height: 33px; border-color: transparent; background: transparent; color: var(--muted); font-size: 0.72rem; }
+.segmented button.active { color: var(--ink); background: var(--surface-3); border-color: var(--line); }
+.viewport-meta { display: flex; gap: 0.7rem; color: var(--dim); font: 0.63rem ui-monospace, SFMono-Regular, Menlo, monospace; }
+.viewport-wrap { position: relative; overflow: hidden; min-height: 0; border: 1px solid var(--line); border-radius: var(--radius); background: #040a10; box-shadow: var(--shadow); }
+#fieldCanvas { display: block; width: 100%; height: 100%; min-height: 330px; touch-action: none; }
+.canvas-legend { position: absolute; right: 1rem; bottom: 1rem; display: flex; align-items: center; gap: 0.4rem; color: rgba(219, 235, 231, 0.55); font-size: 0.58rem; pointer-events: none; }
+.canvas-legend i { width: 74px; height: 6px; border-radius: 99px; background: linear-gradient(90deg, #07101c, #175a72, #2e9c91, #f0be67); }
+.selection-readout { position: absolute; left: 1rem; bottom: 1rem; max-width: 260px; padding: 0.5rem 0.62rem; border: 1px solid var(--line); border-radius: 8px; background: rgba(5, 11, 18, 0.86); color: var(--muted); font: 0.62rem/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; pointer-events: none; }
+.repro-bar { min-height: 46px; padding: 0.45rem 0.7rem; display: grid; grid-template-columns: 0.55fr 0.55fr 1.2fr 1.2fr 1.2fr; gap: 0.6rem; align-items: center; }
+.repro-bar span { min-width: 0; }
+.repro-bar small, .repro-bar b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.repro-bar small { font-size: 0.55rem; letter-spacing: 0.11em; text-transform: uppercase; }
+.repro-bar b { margin-top: 0.15rem; font: 0.66rem ui-monospace, SFMono-Regular, Menlo, monospace; font-weight: 500; }
+.event-rail { min-height: 0; padding: 0.75rem; overflow: hidden; }
+.rail-heading { margin-bottom: 0.55rem; }
+.rail-counts { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+.rail-counts span { padding: 0.2rem 0.45rem; border-radius: 99px; background: var(--surface-3); color: var(--muted); font-size: 0.62rem; }
+.timeline { height: calc(100% - 44px); min-height: 58px; display: flex; gap: 0.45rem; overflow-x: auto; overflow-y: hidden; padding-bottom: 0.25rem; }
+.event-card { flex: 0 0 152px; padding: 0.55rem; border: 1px solid var(--line); border-radius: 9px; background: var(--surface-2); cursor: pointer; }
+.event-card:hover { border-color: var(--line-strong); }
+.event-card strong, .event-card small { display: block; }
+.event-card strong { margin-bottom: 0.2rem; font-size: 0.69rem; }
+.event-card small { color: var(--muted); font: 0.58rem/1.35 ui-monospace, SFMono-Regular, Menlo, monospace; }
+.event-card.projection { border-color: rgba(255, 139, 94, 0.3); }
+.event-card.memory-write { border-color: rgba(239, 189, 115, 0.28); }
+.empty-state { margin: auto; align-self: center; color: var(--dim); font-size: 0.69rem; line-height: 1.4; }
+
+.button-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.45rem; }
+.full-width { width: 100%; margin-top: 0.5rem; }
+.right-panel input[type="text"] { margin-bottom: 0.75rem; }
+.memory-list { list-style: none; margin: 0.75rem 0 0; padding: 0; display: grid; gap: 0.4rem; max-height: 190px; overflow: auto; }
+.memory-list li:not(.empty-state) { padding: 0.56rem; display: grid; grid-template-columns: 1fr auto; gap: 0.2rem 0.6rem; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-2); }
+.memory-list strong { font-size: 0.7rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.memory-list small { grid-column: 1 / -1; font: 0.58rem ui-monospace, SFMono-Regular, Menlo, monospace; }
+.memory-list b { color: var(--amber); font: 0.62rem ui-monospace, SFMono-Regular, Menlo, monospace; font-weight: 500; }
+.provenance-card { margin-top: 0.75rem; display: grid; gap: 0.62rem; }
+.prov-row { display: grid; grid-template-columns: minmax(82px, 0.34fr) 1fr; gap: 0.6rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--line); }
+.prov-row:last-child { border-bottom: 0; }
+.prov-row dt { color: var(--dim); font-size: 0.62rem; }
+.prov-row dd { margin: 0; color: var(--muted); font-size: 0.65rem; line-height: 1.4; overflow-wrap: anywhere; }
+.scope-card { background: linear-gradient(145deg, rgba(15, 31, 42, 0.8), rgba(8, 17, 26, 0.8)); }
+.scope-card p { margin: 0 0 0.7rem; color: var(--muted); font-size: 0.7rem; line-height: 1.52; }
+.scope-card a { font-size: 0.7rem; }
+
+#toast { position: fixed; z-index: 50; right: 1rem; bottom: 1rem; max-width: min(360px, calc(100vw - 2rem)); padding: 0.75rem 0.9rem; border: 1px solid var(--line-strong); border-radius: 10px; background: #132431; color: var(--ink); box-shadow: var(--shadow); font-size: 0.76rem; }
+
+@media (max-width: 1180px) {
+  .topbar { grid-template-columns: 1fr auto; }
+  .status-strip { display: none; }
+  .workspace { grid-template-columns: minmax(210px, 240px) minmax(470px, 1fr); overflow: auto; height: auto; min-height: calc(100vh - 70px); }
+  .right-panel { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); overflow: visible; }
+  .right-panel section { border-bottom: 0; border-right: 1px solid var(--line); }
+  .right-panel section:last-child { border-right: 0; }
+  .center-stage { min-height: 760px; }
+}
+
+@media (max-width: 820px) {
+  .topbar { position: static; grid-template-columns: 1fr; gap: 0.65rem; }
+  .transport { justify-self: stretch; justify-content: stretch; overflow-x: auto; }
+  .transport button { flex: 1 0 auto; min-height: 44px; }
+  .compact-control { flex: 0 0 auto; }
+  .workspace { display: flex; flex-direction: column; height: auto; padding: 0.55rem; }
+  .center-stage { order: -1; min-height: 700px; grid-template-rows: auto minmax(420px, 62vh) auto minmax(130px, auto); }
+  .left-panel, .right-panel { overflow: visible; }
+  .left-panel { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .left-panel section { border-right: 1px solid var(--line); }
+  .right-panel { display: grid; grid-template-columns: 1fr 1fr; }
+  .right-panel section { border-right: 1px solid var(--line); }
+  .right-panel section:nth-child(even) { border-right: 0; }
+  .viewport-toolbar { align-items: flex-start; flex-direction: column; }
+  .viewport-meta { width: 100%; justify-content: space-between; }
+  .repro-bar { grid-template-columns: repeat(2, 1fr); }
+  .repro-bar span:nth-child(n+3) { grid-column: span 2; }
+}
+
+@media (max-width: 560px) {
+  .brand small { font-size: 0.58rem; }
+  .transport { display: grid; grid-template-columns: repeat(3, 1fr); }
+  .compact-control { grid-column: 1 / -1; justify-content: space-between; }
+  .workspace { padding: 0.35rem; }
+  .center-stage { min-height: 690px; grid-template-rows: auto minmax(390px, 58vh) auto minmax(140px, auto); }
+  .segmented { width: 100%; }
+  .segmented button { flex: 1; padding-inline: 0.35rem; min-height: 44px; }
+  .viewport-meta { font-size: 0.56rem; }
+  .left-panel, .right-panel { display: block; }
+  .left-panel section, .right-panel section { border-right: 0; border-bottom: 1px solid var(--line); }
+  .toggle-grid { grid-template-columns: 1fr 1fr; }
+  .repro-bar { grid-template-columns: repeat(2, 1fr); }
+  .canvas-legend { display: none; }
+  #fieldCanvas { min-height: 390px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}
+
+@media (forced-colors: active) {
+  .status-chip, .source-badge, .panel, .viewport-toolbar, .viewport-wrap, .repro-bar, .event-rail { border-color: CanvasText; }
+  button.primary { background: Highlight; color: HighlightText; }
+}
+
+</style>
+</head>
+<body>
+  <a class="skip-link" href="#viewport">Skip to viewport</a>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand" aria-label="Memory Weather">
+        <span class="brand-mark" aria-hidden="true">MW</span>
+        <span>
+          <strong>Memory Weather</strong>
+          <small>12D state-dynamics instrument</small>
+        </span>
+      </div>
+      <div class="status-strip">
+        <span class="status-chip develop">Experimental</span>
+        <span class="status-chip">package 0.1.0</span>
+        <span class="status-chip live" id="runStatus">paused</span>
+      </div>
+      <div class="transport" aria-label="Simulation transport">
+        <button id="runBtn" class="primary" type="button" aria-pressed="false"><span aria-hidden="true">&gt;</span> Run</button>
+        <button id="stepBtn" type="button"><span aria-hidden="true">></span> Step</button>
+        <button id="resetBtn" type="button"><span aria-hidden="true">repeat</span> Reset</button>
+        <label class="compact-control">Speed
+          <select id="speedSelect">
+            <option value="180">slow</option>
+            <option value="80" selected>normal</option>
+            <option value="28">fast</option>
+          </select>
+        </label>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <aside class="panel left-panel" aria-label="Layers and simulation controls">
+        <section>
+          <div class="section-heading">
+            <div><span class="eyebrow">Live measurements</span><h2>Step diagnostics</h2></div>
+            <span class="source-badge direct">direct</span>
+          </div>
+          <div class="meter-grid">
+            <article class="meter"><span>Coherence score</span><strong id="coherenceValue">0.420</strong><i><b id="coherenceBar"></b></i></article>
+            <article class="meter"><span>Input strength</span><strong id="inputValue">0.000</strong><i><b id="inputBar"></b></i></article>
+            <article class="meter"><span>Update magnitude</span><strong id="updateValue">0.000</strong><i><b id="updateBar"></b></i></article>
+            <article class="meter"><span>Smoothed-state alignment</span><strong id="smoothingValue">1.000</strong><i><b id="smoothingBar"></b></i></article>
+          </div>
+          <div class="weather-callout">
+            <span class="weather-symbol" aria-hidden="true">o</span>
+            <div>
+              <strong id="weatherLabel">No measured regime</strong>
+              <small id="weatherRationale">No committed simulation tick is available yet.</small>
+              <small class="weather-alias" id="weatherAlias">Weather alias: Unformed field</small>
+            </div>
+            <span class="source-badge derived">regime view</span>
+          </div>
+        </section>
+
+        <section>
+          <div class="section-heading"><div><span class="eyebrow">Viewport</span><h2>Measured layers</h2></div></div>
+          <label class="select-row">Scalar channel
+            <select id="scalarSelect">
+              <option value="weather">Regime composite</option>
+              <option value="potential">Attractor potential</option>
+              <option value="coherenceScore">Coherence score</option>
+              <option value="fronts">Update fronts</option>
+              <option value="memoryInfluence">Memory influence</option>
+              <option value="projectionReadiness">Basin projection readiness</option>
+              <option value="separation">State-to-smoothed distance</option>
+            </select>
+          </label>
+          <div class="toggle-grid" id="layerControls">
+            <label><input type="checkbox" data-layer="scalar" checked><span>Scalar regime map</span></label>
+            <label><input type="checkbox" data-layer="vectors" checked><span>Update vectors</span></label>
+            <label><input type="checkbox" data-layer="streamlines" checked><span>Streamlines</span></label>
+            <label><input type="checkbox" data-layer="trace" checked><span>State trace</span></label>
+            <label><input type="checkbox" data-layer="smoothed" checked><span>State-to-smoothed distance</span></label>
+            <label><input type="checkbox" data-layer="basins" checked><span>Attractor regions</span></label>
+            <label><input type="checkbox" data-layer="projection" checked><span>Projection boundary</span></label>
+            <label><input type="checkbox" data-layer="memory" checked><span>Memory replay links</span></label>
+            <label><input type="checkbox" data-layer="events" checked><span>Recorded events</span></label>
+            <label><input type="checkbox" data-layer="grid" checked><span>Projection grid</span></label>
+          </div>
+        </section>
+
+        <section>
+          <div class="section-heading"><div><span class="eyebrow">Observation</span><h2>Input strength</h2></div></div>
+          <label class="select-row">Preset
+            <select id="stimulusSelect">
+              <option value="quiet">Quiet</option>
+              <option value="align">Align</option>
+              <option value="disrupt">Disrupt</option>
+              <option value="pulse">Pulse</option>
+              <option value="periodic" selected>Periodic</option>
+              <option value="basin">Selected basin</option>
+            </select>
+          </label>
+          <label class="range-row"><span>Amplitude <output id="amplitudeOutput">0.82</output></span><input id="amplitudeRange" type="range" min="0" max="2" step="0.01" value="0.82"></label>
+          <label class="select-row">Attractor target
+            <select id="basinSelect">
+              <option value="0">Basin 1</option><option value="1" selected>Basin 2</option><option value="2">Basin 3</option>
+              <option value="3">Basin 4</option><option value="4">Basin 5</option><option value="5">Basin 6</option>
+            </select>
+          </label>
+          <p class="fine-print">Click the 2D viewport to supply an explicit forcing target. Ten hidden components receive no invented information.</p>
+        </section>
+
+        <section>
+          <div class="section-heading"><div><span class="eyebrow">Experimental coupling</span><h2>Coupled simulations</h2></div><span class="source-badge derived">local</span></div>
+          <label class="switch-row"><input id="peerToggle" type="checkbox"><span>Enable instance B</span></label>
+          <label class="range-row"><span>Coupling <output id="couplingOutput">0.14</output></span><input id="couplingRange" type="range" min="0" max="0.5" step="0.01" value="0.14"></label>
+          <p class="fine-print">Each instance keeps its own state, input, memory, projection policy, and diagnostics. Coupling uses a frozen prior-state snapshot so processing order cannot steer the result.</p>
+        </section>
+
+        <section>
+          <details>
+            <summary>Mechanisms</summary>
+            <div class="toggle-grid mechanisms" id="ablationControls">
+              <label><input type="checkbox" data-ablation="projection" checked><span>Basin projection</span></label>
+              <label><input type="checkbox" data-ablation="memoryWrite" checked><span>Memory writing</span></label>
+              <label><input type="checkbox" data-ablation="memoryReplay" checked><span>Memory replay</span></label>
+              <label><input type="checkbox" data-ablation="summaries" checked><span>History summaries</span></label>
+              <label><input type="checkbox" data-ablation="noise" checked><span>Adaptive noise</span></label>
+              <label><input type="checkbox" data-ablation="coherenceGate" checked><span>Coherence gate</span></label>
+              <label><input type="checkbox" data-ablation="smoothing" checked><span>State smoothing</span></label>
+            </div>
+          </details>
+        </section>
+      </aside>
+
+      <section class="center-stage">
+        <div class="viewport-toolbar">
+          <div class="segmented" role="group" aria-label="Viewport mode">
+            <button type="button" class="active" data-view="weather" aria-pressed="true">Regime Map</button>
+            <button type="button" data-view="field" aria-pressed="false">2D Field</button>
+            <button type="button" data-view="terrain" aria-pressed="false">3D Terrain</button>
+          </div>
+          <div class="viewport-meta">
+            <span id="projectionMode">fixed 2x12 projection</span>
+            <span id="frameRate">0 fps</span>
+          </div>
+        </div>
+        <div class="viewport-wrap" id="viewport">
+          <canvas id="fieldCanvas" tabindex="0" role="img" aria-label="Memory Weather regime viewport. No measured simulation tick is available yet."></canvas>
+          <div class="canvas-legend" aria-hidden="true"><span>low</span><i></i><span>high</span></div>
+          <div class="selection-readout" id="selectionReadout" hidden></div>
+        </div>
+        <div class="repro-bar" aria-label="Reproducibility identifiers">
+          <span><small>tick</small><b id="tickValue">0</b></span>
+          <span><small>phase</small><b id="phaseValue">0</b></span>
+          <span><small>state hash</small><b id="stateHash"> - </b></span>
+          <span><small>projection</small><b id="projectionHash"> - </b></span>
+          <span><small>field</small><b id="fieldHash"> - </b></span>
+        </div>
+        <section class="event-rail" aria-labelledby="eventTitle">
+          <div class="section-heading rail-heading">
+            <div><span class="eyebrow">Committed artifacts</span><h2 id="eventTitle">Event rail</h2></div>
+            <div class="rail-counts"><span id="projectionCount">0 basin projections</span><span id="memoryCount">0 memory records</span><span id="summaryCount">0 history summaries</span></div>
+          </div>
+          <div class="timeline" id="timeline"><p class="empty-state">Run the engine or inscribe a memory to create auditable events.</p></div>
+        </section>
+      </section>
+
+      <aside class="panel right-panel" aria-label="Memory and provenance inspector">
+        <section>
+          <div class="section-heading"><div><span class="eyebrow">Local artifacts</span><h2>Memory</h2></div><span class="source-badge derived">implementation</span></div>
+          <label class="sr-only" for="memoryInput">Memory label or recall query</label>
+          <input id="memoryInput" type="text" maxlength="120" value="observer field" placeholder="Memory label or recall query" autocomplete="off">
+          <label class="range-row"><span>Event weight <output id="weightOutput">1.00</output></span><input id="weightRange" type="range" min="0.1" max="2" step="0.05" value="1"></label>
+          <div class="button-row">
+            <button id="inscribeBtn" class="primary" type="button">Record memory</button>
+            <button id="recallBtn" type="button">Queue replay</button>
+          </div>
+          <button id="projectionBtn" class="full-width warning" type="button">Request basin projection</button>
+          <ul class="memory-list" id="memoryList"><li class="empty-state">No inscriptions yet. History summary summaries remain a separate mechanism.</li></ul>
+        </section>
+
+        <section class="inspector-section">
+          <div class="section-heading"><div><span class="eyebrow">Evidence chain</span><h2>Projection provenance</h2></div><span class="source-badge">auditable</span></div>
+          <label class="select-row">Feature
+            <select id="featureSelect"></select>
+          </label>
+          <div class="provenance-card" id="provenanceCard"></div>
+        </section>
+
+        <section>
+          <div class="section-heading"><div><span class="eyebrow">Replay</span><h2>Seed & files</h2></div></div>
+          <label class="select-row">Seed
+            <input id="seedInput" type="number" min="0" max="4294967295" step="1" value="12062026">
+          </label>
+          <div class="button-row">
+            <button id="exportBtn" type="button">Export replay</button>
+            <button id="csvBtn" type="button">Telemetry CSV</button>
+          </div>
+          <button id="demoBtn" class="full-width" type="button">Load fixed-seed demo</button>
+          <button id="importBtn" class="full-width" type="button">Import replay JSON</button>
+          <input id="importFile" type="file" accept="application/json,.json" hidden>
+          <p class="fine-print">Files stay local. Imported text is parsed as data and never executed.</p>
+        </section>
+
+        <section class="scope-card">
+          <span class="eyebrow">Scope firewall</span>
+          <p>This is a deterministic hybrid state-space and associative-memory implementation. The viewport is not evidence of physics, quantum behavior, or consciousness.</p>
+          <p class="fine-print">Implementation details: docs/IMPLEMENTATION.md in the repository.</p>
+        </section>
+      </aside>
+    </main>
+  </div>
+
+  <div id="liveRegion" class="sr-only" aria-live="polite"></div>
+  <div id="toast" role="status" aria-live="polite" hidden></div>
+
+<script>
+/* math.js */
+(function (root, factory) {
+  const api = factory();
+  if (typeof module === "object" && module.exports) module.exports = api;
+  else root.MWMath = api;
+})(typeof globalThis !== "undefined" ? globalThis : this, function () {
+  "use strict";
+
+  const EPS = 1e-12;
+
+  function assertFinite(value, label) {
+    if (!Number.isFinite(value)) throw new TypeError(`${label} must be finite`);
+    return value;
+  }
+
+  function assertVec(vec, length, label = "vector") {
+    if (!Array.isArray(vec) || vec.length !== length) {
+      throw new TypeError(`${label} must be an array of length ${length}`);
+    }
+    for (let i = 0; i < vec.length; i += 1) assertFinite(vec[i], `${label}[${i}]`);
+    return vec;
+  }
+
+  function clamp(value, lo, hi) {
+    return Math.min(hi, Math.max(lo, value));
+  }
+
+  function dot(a, b) {
+    let sum = 0;
+    for (let i = 0; i < a.length; i += 1) sum += a[i] * b[i];
+    return sum;
+  }
+
+  function norm(a) {
+    return Math.sqrt(dot(a, a));
+  }
+
+  function add(a, b) {
+    return a.map((value, i) => value + b[i]);
+  }
+
+  function sub(a, b) {
+    return a.map((value, i) => value - b[i]);
+  }
+
+  function scale(a, scalar) {
+    return a.map((value) => value * scalar);
+  }
+
+  function mix(a, b, amount) {
+    return a.map((value, i) => value * (1 - amount) + b[i] * amount);
+  }
+
+  function mean(vectors, dimension) {
+    if (!vectors.length) return Array(dimension).fill(0);
+    const out = Array(dimension).fill(0);
+    for (const vector of vectors) {
+      for (let i = 0; i < dimension; i += 1) out[i] += vector[i];
+    }
+    return out.map((value) => value / vectors.length);
+  }
+
+  function normalize(a, targetNorm = 1) {
+    const length = norm(a);
+    if (length < EPS) return a.map(() => 0);
+    return scale(a, targetNorm / length);
+  }
+
+  function boundVector(a, componentLimit = 2, radialLimit = 2) {
+    let out = a.map((value) => clamp(value, -componentLimit, componentLimit));
+    const length = norm(out);
+    if (length > radialLimit) out = scale(out, radialLimit / length);
+    return out;
+  }
+
+  function cosine(a, b) {
+    const denom = norm(a) * norm(b);
+    return denom < EPS ? 0 : clamp(dot(a, b) / denom, -1, 1);
+  }
+
+  function distance(a, b) {
+    return norm(sub(a, b));
+  }
+
+  function entropyProxy(a) {
+    const weights = a.map((value) => Math.abs(value));
+    const sum = weights.reduce((acc, value) => acc + value, 0);
+    if (sum < EPS) return 0;
+    let entropy = 0;
+    for (const weight of weights) {
+      if (weight > EPS) {
+        const p = weight / sum;
+        entropy -= p * Math.log(p);
+      }
+    }
+    return entropy / Math.log(Math.max(2, a.length));
+  }
+
+  function mix32(value) {
+    let x = value >>> 0;
+    x ^= x >>> 16;
+    x = Math.imul(x, 0x7feb352d);
+    x ^= x >>> 15;
+    x = Math.imul(x, 0x846ca68b);
+    x ^= x >>> 16;
+    return x >>> 0;
+  }
+
+  function fnv1a32(text) {
+    let hash = 0x811c9dc5;
+    for (let i = 0; i < text.length; i += 1) {
+      hash ^= text.charCodeAt(i);
+      hash = Math.imul(hash, 0x01000193);
+    }
+    return hash >>> 0;
+  }
+
+  function keyedUint(seed, stream, step = 0, index = 0) {
+    let value = mix32((seed >>> 0) ^ fnv1a32(String(stream)));
+    value = mix32(value ^ Math.imul((step + 1) >>> 0, 0x9e3779b1));
+    return mix32(value ^ Math.imul((index + 1) >>> 0, 0x85ebca6b));
+  }
+
+  function keyedUniform(seed, stream, step = 0, index = 0) {
+    return (keyedUint(seed, stream, step, index) + 0.5) / 4294967296;
+  }
+
+  function keyedGaussian(seed, stream, step = 0, index = 0) {
+    const u1 = Math.max(EPS, keyedUniform(seed, `${stream}:u1`, step, index));
+    const u2 = keyedUniform(seed, `${stream}:u2`, step, index);
+    return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+  }
+
+  function roundNumber(value, digits = 8) {
+    const factor = 10 ** digits;
+    return Math.round(value * factor) / factor;
+  }
+
+  function quantize(value, digits = 8) {
+    if (Array.isArray(value)) return value.map((item) => quantize(item, digits));
+    if (value && typeof value === "object") {
+      const out = {};
+      for (const key of Object.keys(value).sort()) out[key] = quantize(value[key], digits);
+      return out;
+    }
+    return typeof value === "number" ? roundNumber(value, digits) : value;
+  }
+
+  function stableStringify(value, digits = 8) {
+    return JSON.stringify(quantize(value, digits));
+  }
+
+  function fnv1a64(text) {
+    let hash = 0xcbf29ce484222325n;
+    const prime = 0x100000001b3n;
+    const mask = 0xffffffffffffffffn;
+    const bytes = typeof TextEncoder !== "undefined"
+      ? new TextEncoder().encode(text)
+      : Array.from(Buffer.from(text, "utf8"));
+    for (const byte of bytes) {
+      hash ^= BigInt(byte);
+      hash = (hash * prime) & mask;
+    }
+    return hash.toString(16).padStart(16, "0");
+  }
+
+  function contentHash(value, digits = 8) {
+    return `mw-fnv64:${fnv1a64(stableStringify(value, digits))}`;
+  }
+
+  function textVector(text, dimension = 12, targetNorm = 1.2) {
+    const seed = fnv1a32(String(text).normalize("NFC").toLowerCase());
+    const vector = [];
+    for (let i = 0; i < dimension; i += 1) {
+      const a = keyedUniform(seed, "text-encoder", i, 0) * 2 - 1;
+      const b = keyedUniform(seed, "text-encoder", i, 1) * 2 - 1;
+      vector.push(0.72 * a + 0.28 * b);
+    }
+    return normalize(vector, targetNorm);
+  }
+
+  function matrixVector(matrix, vector) {
+    return matrix.map((row) => dot(row, vector));
+  }
+
+  function transposeVector(matrix, vector) {
+    const width = matrix[0].length;
+    const out = Array(width).fill(0);
+    for (let row = 0; row < matrix.length; row += 1) {
+      for (let col = 0; col < width; col += 1) out[col] += matrix[row][col] * vector[row];
+    }
+    return out;
+  }
+
+  return {
+    EPS,
+    add,
+    assertFinite,
+    assertVec,
+    boundVector,
+    clamp,
+    contentHash,
+    cosine,
+    distance,
+    dot,
+    entropyProxy,
+    fnv1a32,
+    keyedGaussian,
+    keyedUint,
+    keyedUniform,
+    matrixVector,
+    mean,
+    mix,
+    norm,
+    normalize,
+    quantize,
+    roundNumber,
+    scale,
+    stableStringify,
+    sub,
+    textVector,
+    transposeVector
+  };
+});
+
+/* engine.js */
+(function (root, factory) {
+  const math = typeof module === "object" && module.exports ? require("./math.js") : root.MWMath;
+  const api = factory(math);
+  if (typeof module === "object" && module.exports) module.exports = api;
+  else root.MemoryWeatherEngine = api;
+})(typeof globalThis !== "undefined" ? globalThis : this, function (M) {
+  "use strict";
+
+  const DIMENSION = 12;
+  const ENGINE_ID = "state-dynamics-memory-weather/mw-r12";
+  const ENGINE_VERSION = "0.1.1";
+  const SCHEMA_VERSION = "memory-weather-replay/v2";
+  const ZERO = Object.freeze(Array(DIMENSION).fill(0));
+
+  const BASIN_SOURCE = [
+    [1.0, 0.7, 0.2, -0.1, 0.4, -0.2, 0.8, 0.1, -0.3, 0.5, 0.2, -0.4],
+    [-0.3, 1.0, 0.5, 0.4, -0.6, 0.1, -0.2, 0.8, 0.2, -0.5, 0.3, 0.6],
+    [0.2, -0.4, 1.0, 0.6, 0.1, 0.7, -0.5, -0.2, 0.8, 0.2, -0.6, 0.1],
+    [-0.8, 0.1, -0.2, 1.0, 0.5, -0.4, 0.3, -0.6, 0.1, 0.7, 0.4, -0.2],
+    [0.6, -0.5, 0.3, -0.2, 1.0, 0.4, 0.1, 0.7, -0.6, 0.2, 0.5, -0.3],
+    [-0.2, 0.6, -0.7, 0.3, -0.1, 1.0, 0.5, 0.2, 0.4, -0.6, 0.1, 0.8]
+  ];
+  const BASIN_LABELS = ["Basin 1", "Basin 2", "Basin 3", "Basin 4", "Basin 5", "Basin 6"];
+  const BASINS = Object.freeze(BASIN_SOURCE.map((latent, id) => Object.freeze({
+    id,
+    label: BASIN_LABELS[id],
+    latent: Object.freeze(M.normalize(latent, 1.55))
+  })));
+
+  const DEFAULT_CONFIG = Object.freeze({
+    seed: 12062026,
+    dimension: DIMENSION,
+    componentLimit: 2,
+    radialLimit: 2,
+    smoothingRate: 0.1,
+    updateScale: 0.92,
+    updateLimit: 1.4,
+    coherenceEma: 0.24,
+    projectionThreshold: 0.78,
+    projectionDwell: 2,
+    projectionHold: 6,
+    projectionMix: 0.82,
+    summaryInterval: 12,
+    memoryCapacity: 48,
+    traceCap: 720,
+    frameCap: 720,
+    eventCap: 360,
+    noiseAmplitude: 0.055,
+    memoryBias: 0.18,
+    recallThreshold: 0.15,
+    couplingStrength: 0.14,
+    stimulusMode: "periodic",
+    stimulusAmplitude: 0.82,
+    selectedBasin: 1,
+    mechanisms: Object.freeze({
+      projection: true,
+      memoryWrite: true,
+      memoryReplay: true,
+      summaries: true,
+      noise: true,
+      coherenceGate: true,
+      smoothing: true,
+      coupling: true
+    })
+  });
+
+  const NUMERIC_RANGES = {
+    componentLimit: [0.1, 20],
+    radialLimit: [0.1, 20],
+    smoothingRate: [0, 1],
+    updateScale: [0, 10],
+    updateLimit: [0.01, 20],
+    coherenceEma: [0, 1],
+    projectionThreshold: [0, 1],
+    projectionMix: [0, 1],
+    noiseAmplitude: [0, 1],
+    memoryBias: [0, 2],
+    recallThreshold: [-1, 1],
+    couplingStrength: [0, 1],
+    stimulusAmplitude: [0, 4]
+  };
+  const INTEGER_RANGES = {
+    projectionDwell: [1, 1000],
+    projectionHold: [0, 10000],
+    summaryInterval: [1, 10000],
+    memoryCapacity: [1, 10000],
+    traceCap: [24, 100000],
+    frameCap: [24, 100000],
+    eventCap: [24, 100000],
+    selectedBasin: [0, BASINS.length - 1]
+  };
+  const STIMULUS_MODES = new Set(["quiet", "align", "disrupt", "pulse", "periodic", "basin"]);
+
+  function clone(value) {
+    return JSON.parse(JSON.stringify(value));
+  }
+
+  function createConfig(overrides = {}) {
+    const config = {
+      ...clone(DEFAULT_CONFIG),
+      ...clone(overrides),
+      mechanisms: { ...DEFAULT_CONFIG.mechanisms, ...(overrides.mechanisms || {}) }
+    };
+    if (!Number.isInteger(config.seed) || config.seed < 0 || config.seed > 0xffffffff) {
+      throw new RangeError("seed must be an unsigned 32-bit integer");
+    }
+    if (config.dimension !== DIMENSION) throw new RangeError(`dimension must remain ${DIMENSION}`);
+    for (const [key, [lo, hi]] of Object.entries(NUMERIC_RANGES)) {
+      const value = M.assertFinite(config[key], key);
+      if (value < lo || value > hi) throw new RangeError(`${key} must be in [${lo}, ${hi}]`);
+    }
+    for (const [key, [lo, hi]] of Object.entries(INTEGER_RANGES)) {
+      const value = config[key];
+      if (!Number.isInteger(value) || value < lo || value > hi) {
+        throw new RangeError(`${key} must be an integer in [${lo}, ${hi}]`);
+      }
+    }
+    if (!STIMULUS_MODES.has(config.stimulusMode)) throw new RangeError("unsupported stimulusMode");
+    for (const [key, value] of Object.entries(config.mechanisms)) {
+      if (typeof value !== "boolean") throw new TypeError(`mechanisms.${key} must be boolean`);
+    }
+    return config;
+  }
+
+  function runIdFor(config, observerId = "observer-a") {
+    const digest = M.contentHash({ seed: config.seed, observerId, engine: ENGINE_VERSION }).split(":")[1];
+    return `mw-${digest.slice(0, 10)}`;
+  }
+
+  function initialLatent(config, observerId) {
+    const observerOffset = M.fnv1a32(observerId);
+    const vector = Array.from({ length: DIMENSION }, (_, i) =>
+      0.18 * M.keyedGaussian(config.seed ^ observerOffset, "initial-state", 0, i)
+    );
+    return M.boundVector(vector, config.componentLimit, Math.min(0.72, config.radialLimit));
+  }
+
+  function stateHash(currentState) {
+    return M.contentHash({
+      id: currentState.id,
+      t: currentState.t,
+      latent: currentState.latent,
+      coherence: currentState.coherence,
+      inputStrength: currentState.inputStrength,
+      basinId: currentState.basinId == null ? null : currentState.basinId
+    });
+  }
+
+  function createState(overrides = {}) {
+    const config = createConfig(overrides.config || overrides);
+    const observerId = overrides.observerId || "observer-a";
+    const latent = initialLatent(config, observerId);
+    const runId = runIdFor(config, observerId);
+    const currentState = {
+      id: `${observerId}:0`,
+      observerId,
+      t: 0,
+      latent,
+      coherence: 0.42,
+      inputStrength: 0,
+      basinId: null
+    };
+    return {
+      schemaVersion: SCHEMA_VERSION,
+      engineId: ENGINE_ID,
+      engineVersion: ENGINE_VERSION,
+      runId,
+      config,
+      currentState,
+      smoothedState: latent.map((value) => value * 0.88),
+      lastSmoothed: null,
+      lastUpdate: { vec: [...ZERO], magnitude: 0, basis: "bounded-input-difference" },
+      lastInput: { fieldId: "initial", data: [...ZERO], timestamp: 0, energy: 0, noise: null, recall: null },
+      context: {
+        step: 0,
+        phase: 0,
+        projectionDwellCount: 0,
+        holdRemaining: 0,
+        forceProjection: false,
+        forcingVector: null,
+        forcingLabel: null,
+        couplingVector: null,
+        couplingSourceHash: null,
+        pendingRecall: null,
+        recallQuery: "",
+        selectedBasin: config.selectedBasin,
+        stimulusMode: config.stimulusMode,
+        stimulusAmplitude: config.stimulusAmplitude
+      },
+      frames: [],
+      trace: [],
+      events: [],
+      memorySummaries: [],
+      memories: [],
+      counters: {
+        projection: 0,
+        summaries: 0,
+        memoryWrites: 0,
+        recallApplied: 0,
+        recallEligible: 0,
+        wouldProject: 0
+      },
+      currentHash: stateHash(currentState)
+    };
+  }
+
+  function appendBounded(target, value, cap) {
+    target.push(value);
+    if (target.length > cap) target.splice(0, target.length - cap);
+  }
+
+  function nearestBasin(latent) {
+    let best = BASINS[0];
+    let bestDistance = Infinity;
+    for (const basin of BASINS) {
+      const distance = M.distance(latent, basin.latent);
+      if (distance < bestDistance) {
+        best = basin;
+        bestDistance = distance;
+      }
+    }
+    return { basin: best, distance: bestDistance };
+  }
+
+  function sampleAdaptiveNoise(state) {
+    const enabled = state.config.mechanisms.noise;
+    const lastFrame = state.frames[state.frames.length - 1];
+    const stuckBoost = lastFrame && lastFrame.coherenceScore > 0.84 && lastFrame.drift < 0.012 ? 1.55 : 1;
+    const amp = enabled ? state.config.noiseAmplitude * stuckBoost : 0;
+    const vec = Array.from({ length: DIMENSION }, (_, i) =>
+      amp * M.keyedGaussian(state.config.seed, `${state.currentState.observerId}:omega`, state.context.step, i)
+    );
+    return {
+      enabled,
+      stream: `${state.currentState.observerId}:omega`,
+      seed: state.config.seed,
+      step: state.context.step,
+      amp,
+      kind: enabled ? (stuckBoost > 1 ? "stuck-boost" : "bounded-gaussian") : "ablated-zero",
+      vec
+    };
+  }
+
+  function updateSmoothedState(state) {
+    const beta = state.config.mechanisms.smoothing ? state.config.smoothingRate : 0;
+    const proposedSmoothedState = M.boundVector(
+      M.mix(state.smoothedState, state.currentState.latent, beta),
+      state.config.componentLimit,
+      state.config.radialLimit
+    );
+    return {
+      latent: [...proposedSmoothedState],
+      smoothedState: [...proposedSmoothedState],
+      proposedSmoothedState,
+      confidence: Math.exp(-M.distance(state.currentState.latent, proposedSmoothedState)),
+      basis: "StateSmoothedR12"
+    };
+  }
+
+  function stimulusVector(state) {
+    const { seed } = state.config;
+    const { step, stimulusMode: mode, stimulusAmplitude: amplitude } = state.context;
+    if (state.context.forcingVector) return M.scale(state.context.forcingVector, amplitude);
+    if (mode === "quiet") return [...ZERO];
+    if (mode === "align") {
+      const target = nearestBasin(state.currentState.latent).basin.latent;
+      return M.scale(target, amplitude);
+    }
+    if (mode === "basin") return M.scale(BASINS[state.context.selectedBasin].latent, amplitude);
+    if (mode === "disrupt") {
+      return M.normalize(Array.from({ length: DIMENSION }, (_, i) =>
+        M.keyedGaussian(seed, `${state.currentState.observerId}:disrupt`, step, i)
+      ), amplitude);
+    }
+    if (mode === "pulse") {
+      const out = Array(DIMENSION).fill(0);
+      const axis = Math.floor(step / 18) % DIMENSION;
+      out[axis] = amplitude * (Math.sin(step * 0.33) >= 0 ? 1 : -1);
+      out[(axis + 5) % DIMENSION] = 0.35 * amplitude * Math.cos(step * 0.21);
+      return out;
+    }
+    return Array.from({ length: DIMENSION }, (_, i) =>
+      amplitude * (0.54 * Math.sin(step * 0.071 + i * 0.63) + 0.24 * Math.cos(step * 0.043 - i * 0.37))
+    );
+  }
+
+  function sampleInput(state, noise) {
+    const base = stimulusVector(state);
+    const recall = state.config.mechanisms.memoryReplay ? state.context.pendingRecall : null;
+    const recallBias = recall ? M.scale(recall.latent, state.config.memoryBias * recall.similarity) : [...ZERO];
+    const coupling = state.config.mechanisms.coupling && state.context.couplingVector ? state.context.couplingVector : ZERO;
+    const data = M.boundVector(
+      M.add(M.add(M.add(base, noise.vec), recallBias), coupling),
+      state.config.componentLimit,
+      state.config.radialLimit
+    );
+    const energy = M.norm(data);
+    return {
+      fieldId: `${state.runId}:phi:${state.context.step}`,
+      data,
+      timestamp: state.context.step,
+      energy,
+      source: state.context.forcingVector ? "explicit-projected-forcing" : `preset:${state.context.stimulusMode}`,
+      noise,
+      recall: recall ? {
+        packetId: recall.packetId,
+        memoryId: recall.memoryId,
+        similarity: recall.similarity,
+        applied: true
+      } : null,
+      coupling: state.config.mechanisms.coupling && state.context.couplingVector ? {
+        sourceHash: state.context.couplingSourceHash,
+        magnitude: M.norm(state.context.couplingVector),
+        applied: true,
+        classification: "DEVELOP multi-observer coupling"
+      } : null
+    };
+  }
+
+  function computeStateUpdate(state, input) {
+    const gate = state.config.mechanisms.coherenceGate ? 0.2 + 0.8 * state.currentState.coherence : 0.6;
+    let vec = M.scale(M.sub(input.data, state.currentState.latent), state.config.updateScale * gate);
+    const magnitude = M.norm(vec);
+    if (magnitude > state.config.updateLimit) vec = M.scale(vec, state.config.updateLimit / magnitude);
+    return {
+      vec,
+      magnitude: M.norm(vec),
+      basis: "bounded-input-difference",
+      proxy: "Phi.data - SimulationState.latent",
+      coherenceGate: gate
+    };
+  }
+
+  // Declared combine implementation: external typed fusion is implemented only through
+  // rep, repG, mergeR, decode, and extractCombinedState. Arithmetic occurs inside mergeR.
+  function representSmoothedState(smoothed) {
+    return { kind: "FusionCarrierR12/smoothed", vec: [...smoothed.latent] };
+  }
+
+  function representUpdate(update) {
+    return { kind: "FusionCarrierR12/computeStateUpdate", vec: [...update.vec] };
+  }
+
+  function mergeR(smoothedCarrier, updateCarrier, coherenceScore) {
+    const mix = M.clamp(0.35 + 0.5 * coherenceScore, 0.2, 0.9);
+    const gate = M.clamp(0.15 + 0.7 * (1 - 0.45 * coherenceScore), 0.1, 1);
+    return {
+      kind: "FusionCarrierR12/merged",
+      vec: smoothedCarrier.vec.map((value, i) => value + gate * (1 - mix) * updateCarrier.vec[i]),
+      mix,
+      gate
+    };
+  }
+
+  function decode(merged, state, input) {
+    const raw = merged.vec;
+    const latent = M.boundVector(raw, state.config.componentLimit, state.config.radialLimit);
+    return {
+      currentState: {
+        id: `${state.currentState.observerId}:${state.context.step + 1}`,
+        observerId: state.currentState.observerId,
+        t: state.context.step + 1,
+        latent,
+        coherence: state.currentState.coherence,
+        inputStrength: input.energy,
+        basinId: state.currentState.basinId
+      },
+      mix: merged.mix,
+      gate: merged.gate,
+      clamped: M.distance(raw, latent) > 1e-10
+    };
+  }
+
+  // decode returns the implementation-local CombinedState record. This explicit projection
+  // is the final CombinedState -> State_sim leg of the environment-indexed factorization.
+  function extractCombinedState(fusion) {
+    if (!fusion || !fusion.currentState || !Array.isArray(fusion.currentState.latent)) {
+      throw new TypeError("extractCombinedState expects a CombinedState record with currentState");
+    }
+    return fusion.currentState;
+  }
+
+  function combineStateAndUpdate(state, smoothed, update, input) {
+    return decode(mergeR(representSmoothedState(smoothed), representUpdate(update), state.currentState.coherence), state, input);
+  }
+
+  function coherenceOf(state, candidate, input, update) {
+    const alignment = (M.cosine(candidate.latent, input.data) + 1) / 2;
+    const calm = Math.exp(-0.7 * input.energy);
+    const focus = Math.exp(-0.9 * update.magnitude);
+    const raw = 0.5 * alignment + 0.25 * calm + 0.15 * focus + 0.1 * state.currentState.coherence;
+    return M.clamp((1 - state.config.coherenceEma) * state.currentState.coherence + state.config.coherenceEma * raw, 0, 1);
+  }
+
+  function shouldProjectToBasin(state, assessment, forced) {
+    if (
+      !assessment ||
+      assessment.run_id !== state.runId ||
+      assessment.observer_id !== state.currentState.observerId ||
+      assessment.step !== state.context.step ||
+      assessment.phase !== state.context.phase
+    ) {
+      throw new TypeError("shouldProjectToBasin expects the current StateMeta assessment");
+    }
+    const coherenceScore = M.assertFinite(assessment.coherenceScore, "assessment.coherenceScore");
+    const wouldTrigger = forced || coherenceScore >= state.config.projectionThreshold;
+    let dwell = wouldTrigger ? state.context.projectionDwellCount + 1 : 0;
+    if (forced) dwell = state.config.projectionDwell;
+    const eligible = state.context.holdRemaining === 0 && dwell >= state.config.projectionDwell;
+    return {
+      wouldTrigger,
+      eligible,
+      triggered: state.config.mechanisms.projection && eligible,
+      dwell,
+      holdRemaining: state.context.holdRemaining,
+      reason: forced ? "manual-request" : "coherenceScore-dwell"
+    };
+  }
+
+  function projectTowardBasin(state, candidate, coherenceScore, reason) {
+    const preHash = stateHash(candidate);
+    const nearest = nearestBasin(candidate.latent);
+    const beforeEnergy = M.norm(candidate.latent);
+    const latent = M.boundVector(
+      M.mix(candidate.latent, nearest.basin.latent, state.config.projectionMix),
+      state.config.componentLimit,
+      state.config.radialLimit
+    );
+    const currentState = { ...candidate, latent, basinId: nearest.basin.id };
+    const postHash = stateHash(currentState);
+    const event = {
+      eventId: `${state.runId}:projection:${state.context.step}:${state.counters.projection}`,
+      kind: "projection",
+      operator: "Basin projection",
+      step: state.context.step,
+      reason,
+      preHash,
+      postHash,
+      energyDrop: beforeEnergy - M.norm(latent),
+      basinId: nearest.basin.id,
+      basinLabel: nearest.basin.label,
+      coherenceScore,
+      sourceStatus: "direct-event"
+    };
+    return { currentState, event };
+  }
+
+  function makeDiagnosticFrame(state, smoothed, input, update, fusion, coherenceScore) {
+    const candidateState = extractCombinedState(fusion);
+    const drift = M.distance(candidateState.latent, state.currentState.latent);
+    const updateDrift = M.distance(update.vec, state.lastUpdate.vec);
+    return {
+      run_id: state.runId,
+      observer_id: state.currentState.observerId,
+      step: state.context.step,
+      phase: state.context.phase,
+      coherenceScore,
+      input_strength: input.energy,
+      update_magnitude: update.magnitude,
+      smoothing_confidence: smoothed.confidence,
+      entropy: M.entropyProxy(candidateState.latent),
+      drift,
+      stable: drift < 0.025 && update.magnitude < 0.08,
+      tags: ["tick", `phase:${state.context.phase}`],
+      scalars: {
+        updateDrift,
+        mix: fusion.mix,
+        gate: fusion.gate,
+        noiseAmplitude: input.noise.amp,
+        recallSimilarity: input.recall ? input.recall.similarity : 0,
+        couplingMagnitude: input.coupling ? input.coupling.magnitude : 0
+      },
+      state_hash_pre_projection: stateHash({ ...candidateState, coherence: coherenceScore }),
+      sourceStatus: "direct-telemetry"
+    };
+  }
+
+  function finalizeDiagnosticFrame(frame, predicate) {
+    frame.projection_would_trigger = predicate.wouldTrigger;
+    frame.projection_eligible = predicate.eligible;
+    frame.projection_triggered = predicate.triggered;
+    frame.projection_reason = predicate.reason;
+    frame.scalars.dwell = predicate.dwell;
+    frame.scalars.holdRemaining = predicate.holdRemaining;
+    if (predicate.triggered) frame.tags.push("projection");
+    return frame;
+  }
+
+  function storeHistorySummary(state) {
+    const window = state.trace.slice(-state.config.summaryInterval);
+    if (!window.length) return null;
+    const latent = M.boundVector(
+      M.mean(window.map((frame) => frame.latent), DIMENSION),
+      state.config.componentLimit,
+      state.config.radialLimit
+    );
+    const node = {
+      nodeId: `${state.runId}:memorySummaries:${state.counters.summaries}`,
+      operator: "History summary",
+      createdStep: state.context.step,
+      sourceSteps: [window[0].step, window[window.length - 1].step],
+      latent,
+      weight: window.reduce((sum, frame) => sum + frame.coherenceScore, 0) / window.length,
+      sourceHash: M.contentHash(window.map((frame) => frame.stateHash)),
+      sourceStatus: "direct-artifact"
+    };
+    state.counters.summaries += 1;
+    appendBounded(state.memorySummaries, node, state.config.memoryCapacity);
+    return node;
+  }
+
+  function recallCandidates(state) {
+    const memory = state.memories.map((item) => ({
+      memoryId: item.memoryId,
+      label: item.label,
+      latent: item.latent,
+      weight: item.weight,
+      kind: "inscription"
+    }));
+    const memorySummaries = state.memorySummaries.map((item) => ({
+      memoryId: item.nodeId,
+      label: `History summary ${item.sourceSteps[0]}-${item.sourceSteps[1]}`,
+      latent: item.latent,
+      weight: item.weight,
+      kind: "memorySummaries"
+    }));
+    return memory.concat(memorySummaries);
+  }
+
+  function selectRecall(state) {
+    if (!state.config.mechanisms.memoryReplay) return null;
+    const candidates = recallCandidates(state);
+    if (!candidates.length) return null;
+    const query = state.context.recallQuery
+      ? M.textVector(state.context.recallQuery, DIMENSION, 1.2)
+      : state.currentState.latent;
+    let best = null;
+    for (const candidate of candidates) {
+      const similarity = M.cosine(query, candidate.latent);
+      if (!best || similarity > best.similarity) best = { ...candidate, similarity };
+    }
+    if (!best || best.similarity < state.config.recallThreshold) return null;
+    state.counters.recallEligible += 1;
+    return {
+      packetId: `${state.runId}:recall:${state.context.step}:${best.memoryId}`,
+      operator: "Memory influence",
+      memoryId: best.memoryId,
+      label: best.label,
+      kind: best.kind,
+      similarity: best.similarity,
+      latent: [...best.latent],
+      query: state.context.recallQuery || null,
+      appliesAtStep: state.context.step + 1,
+      sourceStatus: "direct-artifact"
+    };
+  }
+
+  function weatherClass(frame) {
+    if (!frame) return { id: "initial", label: "Unformed field", rationale: "No committed tick yet" };
+    if (frame.projection_triggered) return { id: "projection-clearing", label: "Projection clearing", rationale: "Basin projection event committed this tick" };
+    if (frame.coherenceScore >= 0.72 && frame.update_magnitude < 0.18) return { id: "stable-high", label: "Stable high", rationale: "High Coherence with low Update magnitude" };
+    if (frame.input_strength > 1.15 && frame.update_magnitude > 0.42) return { id: "shear-front", label: "Shear front", rationale: "High Input energy and Update magnitude" };
+    if (frame.projection_would_trigger) return { id: "projection-watch", label: "Projection watch", rationale: "Readiness predicate is active" };
+    if (frame.scalars.recallSimilarity > 0) return { id: "memory-front", label: "Memory front", rationale: "Applied Memory influence packet contributes to Input" };
+    return { id: "variable", label: "Variable field", rationale: "No specialized deterministic rule matched" };
+  }
+
+  function addEvent(state, event) {
+    appendBounded(state.events, event, state.config.eventCap);
+  }
+
+  function step(state, observation = {}) {
+    validateStateShape(state);
+    if (observation.stimulusMode != null) {
+      if (!STIMULUS_MODES.has(observation.stimulusMode)) throw new RangeError("unsupported stimulusMode");
+      state.context.stimulusMode = observation.stimulusMode;
+    }
+    if (observation.stimulusAmplitude != null) {
+      const value = M.assertFinite(observation.stimulusAmplitude, "stimulusAmplitude");
+      state.context.stimulusAmplitude = M.clamp(value, 0, 4);
+    }
+    if (observation.selectedBasin != null) {
+      if (!Number.isInteger(observation.selectedBasin) || observation.selectedBasin < 0 || observation.selectedBasin >= BASINS.length) {
+        throw new RangeError("selectedBasin is invalid");
+      }
+      state.context.selectedBasin = observation.selectedBasin;
+    }
+    if (observation.forcingVector !== undefined) {
+      state.context.forcingVector = observation.forcingVector == null
+        ? null
+        : [...M.assertVec(observation.forcingVector, DIMENSION, "forcingVector")];
+      state.context.forcingLabel = observation.forcingLabel || null;
+    }
+    if (observation.couplingVector !== undefined) {
+      state.context.couplingVector = observation.couplingVector == null
+        ? null
+        : [...M.assertVec(observation.couplingVector, DIMENSION, "couplingVector")];
+      state.context.couplingSourceHash = observation.couplingSourceHash || null;
+    }
+
+    const previousBasinId = state.currentState.basinId;
+    const forced = state.context.forceProjection;
+    state.context.forceProjection = false;
+    const noise = sampleAdaptiveNoise(state);
+    const smoothed = updateSmoothedState(state);
+    const input = sampleInput(state, noise);
+    const update = computeStateUpdate(state, input);
+    const fusion = combineStateAndUpdate(state, smoothed, update, input);
+    const candidateState = extractCombinedState(fusion);
+    const coherenceScore = coherenceOf(state, candidateState, input, update);
+    candidateState.coherence = coherenceScore;
+    const frame = makeDiagnosticFrame(state, smoothed, input, update, fusion, coherenceScore);
+    const predicate = shouldProjectToBasin(state, frame, forced);
+    finalizeDiagnosticFrame(frame, predicate);
+    const tickEvents = [];
+    let committedState = candidateState;
+
+    if (predicate.wouldTrigger) state.counters.wouldProject += 1;
+    if (predicate.triggered) {
+      const result = projectTowardBasin(state, candidateState, coherenceScore, predicate.reason);
+      committedState = result.currentState;
+      tickEvents.push(result.event);
+      state.counters.projection += 1;
+      state.context.holdRemaining = state.config.projectionHold;
+      state.context.projectionDwellCount = 0;
+    } else {
+      state.context.projectionDwellCount = predicate.dwell;
+      state.context.holdRemaining = Math.max(0, state.context.holdRemaining - 1);
+    }
+
+    state.currentState = committedState;
+    state.smoothedState = [...smoothed.proposedSmoothedState];
+    state.lastSmoothed = smoothed;
+    state.lastUpdate = update;
+    state.lastInput = input;
+    state.currentHash = stateHash(state.currentState);
+    frame.state_hash = state.currentHash;
+    frame.weather = weatherClass(frame);
+    frame.applied_recall = input.recall;
+    appendBounded(state.frames, frame, state.config.frameCap);
+    appendBounded(state.trace, {
+      step: frame.step,
+      phase: frame.phase,
+      latent: [...state.currentState.latent],
+      smoothedLatent: [...smoothed.latent],
+      update: [...update.vec],
+      input: [...input.data],
+      coherenceScore,
+      stateHash: state.currentHash,
+      projection: frame.projection_triggered,
+      basinId: state.currentState.basinId,
+      recallPacketId: input.recall ? input.recall.packetId : null
+    }, state.config.traceCap);
+
+    if (input.recall) state.counters.recallApplied += 1;
+    if (state.config.mechanisms.summaries && (state.context.step + 1) % state.config.summaryInterval === 0) {
+      const node = storeHistorySummary(state);
+      if (node) tickEvents.push({
+        eventId: `${state.runId}:summary:${state.context.step}:${node.nodeId}`,
+        kind: "summary",
+        operator: "History summary",
+        step: state.context.step,
+        nodeId: node.nodeId,
+        sourceHash: node.sourceHash,
+        sourceStatus: "direct-event"
+      });
+    }
+
+    state.context.pendingRecall = selectRecall(state);
+    if (state.currentState.basinId != null && state.currentState.basinId !== previousBasinId) {
+      tickEvents.push({
+        eventId: `${state.runId}:basin:${state.context.step}:${state.currentState.basinId}`,
+        kind: "basin-transition",
+        step: state.context.step,
+        fromBasinId: previousBasinId,
+        toBasinId: state.currentState.basinId,
+        toBasinLabel: BASINS[state.currentState.basinId].label,
+        sourceHash: state.currentHash,
+        sourceStatus: "direct-event"
+      });
+    }
+    for (const event of tickEvents) addEvent(state, event);
+    state.context.phase = (state.context.phase + 1) % 8;
+    state.context.step += 1;
+    return { state, nextState: state.currentState, frame, events: tickEvents };
+  }
+
+  function inscribeMemory(state, label, weight = 1) {
+    validateStateShape(state);
+    const cleanLabel = String(label || "").trim().slice(0, 120);
+    if (!cleanLabel) throw new RangeError("memory label cannot be empty");
+    const cleanWeight = M.clamp(M.assertFinite(Number(weight), "memory weight"), 0.1, 2);
+    if (!state.config.mechanisms.memoryWrite) {
+      return { state, memory: null, event: null, status: "ablated" };
+    }
+    const encoded = M.textVector(cleanLabel, DIMENSION, 1.2);
+    const latent = M.boundVector(M.mix(state.currentState.latent, encoded, 0.35), state.config.componentLimit, state.config.radialLimit);
+    const memory = {
+      memoryId: `${state.runId}:memory:${state.counters.memoryWrites}`,
+      label: cleanLabel,
+      latent,
+      weight: cleanWeight,
+      createdStep: state.context.step,
+      sourceStateHash: state.currentHash,
+      encoder: "fnv1a32-keyed-r12/v1",
+      sourceStatus: "implementation-local-artifact"
+    };
+    const event = {
+      eventId: `${state.runId}:memory-write:${state.context.step}:${state.counters.memoryWrites}`,
+      kind: "memory-write",
+      step: state.context.step,
+      memoryId: memory.memoryId,
+      label: cleanLabel,
+      sourceStateHash: state.currentHash,
+      sourceStatus: "direct-event",
+      note: "Manual inscription is a implementation-local action; it is not an alias for History summary."
+    };
+    state.counters.memoryWrites += 1;
+    state.memories.push(memory);
+    addEvent(state, event);
+    return { state, memory, event, status: "written" };
+  }
+
+  function queueRecall(state, query) {
+    validateStateShape(state);
+    state.context.recallQuery = String(query || "").trim().slice(0, 120);
+    state.context.pendingRecall = selectRecall(state);
+    return state.context.pendingRecall;
+  }
+
+  function requestProjection(state) {
+    validateStateShape(state);
+    state.context.forceProjection = true;
+  }
+
+  function setMechanism(state, key, enabled) {
+    if (!(key in state.config.mechanisms)) throw new RangeError(`unknown ablation: ${key}`);
+    state.config.mechanisms[key] = Boolean(enabled);
+    if (key === "memoryReplay" && !enabled) state.context.pendingRecall = null;
+  }
+
+  function serialize(state, extra = {}) {
+    validateStateShape(state);
+    return {
+      schemaVersion: SCHEMA_VERSION,
+      engine: { id: ENGINE_ID, version: ENGINE_VERSION },
+      exportedAt: null,
+      determinism: {
+        seed: state.config.seed,
+        quantizationDigits: 8,
+        stateHashAlgorithm: "FNV-1a-64 over canonical quantized JSON",
+        hashVersion: "memory-weather-state/v2",
+        currentStateHash: state.currentHash,
+        configHash: M.contentHash(state.config)
+      },
+      state: clone(state),
+      ...clone(extra)
+    };
+  }
+
+  function hydrate(replay) {
+    if (!replay || replay.schemaVersion !== SCHEMA_VERSION || !replay.state) {
+      throw new TypeError(`expected ${SCHEMA_VERSION} replay`);
+    }
+    const incoming = clone(replay.state);
+    incoming.config = createConfig(incoming.config);
+    validateStateShape(incoming);
+    const actualHash = stateHash(incoming.currentState);
+    if (incoming.currentHash !== actualHash) throw new Error("replay current currentState hash mismatch");
+    return incoming;
+  }
+
+  function validateStateShape(state) {
+    if (!state || state.schemaVersion !== SCHEMA_VERSION) throw new TypeError("invalid runtime state schema");
+    if (state.engineId !== ENGINE_ID || state.engineVersion !== ENGINE_VERSION) throw new TypeError("runtime engine identity mismatch");
+    const assertLatent = (vector, label) => {
+      M.assertVec(vector, DIMENSION, label);
+      if (vector.some((value) => Math.abs(value) > state.config.componentLimit + 1e-8)) throw new RangeError(`${label} exceeds component bounds`);
+      if (M.norm(vector) > state.config.radialLimit + 1e-8) throw new RangeError(`${label} exceeds radial bounds`);
+    };
+    assertLatent(state.currentState.latent, "currentState.latent");
+    assertLatent(state.smoothedState, "smoothedState");
+    if (!Number.isInteger(state.context.step) || state.context.step < 0) throw new TypeError("context.step must be a non-negative integer");
+    if (!Number.isInteger(state.currentState.t) || state.currentState.t !== state.context.step) throw new TypeError("currentState.t must equal context.step");
+    if (!Number.isInteger(state.context.phase) || state.context.phase < 0 || state.context.phase > 7) throw new TypeError("context.phase must be an integer in [0,7]");
+    M.assertFinite(state.currentState.coherence, "currentState.coherence");
+    if (state.currentState.coherence < 0 || state.currentState.coherence > 1) throw new RangeError("currentState.coherence must be in [0,1]");
+    M.assertVec(state.lastUpdate.vec, DIMENSION, "lastUpdate.vec");
+    M.assertVec(state.lastInput.data, DIMENSION, "lastInput.data");
+    if (state.context.forcingVector) M.assertVec(state.context.forcingVector, DIMENSION, "context.forcingVector");
+    if (state.context.couplingVector) M.assertVec(state.context.couplingVector, DIMENSION, "context.couplingVector");
+    if (state.context.pendingRecall) M.assertVec(state.context.pendingRecall.latent, DIMENSION, "context.pendingRecall.latent");
+    for (const [name, cap] of [["frames", state.config.frameCap], ["trace", state.config.traceCap], ["events", state.config.eventCap], ["memorySummaries", state.config.memoryCapacity]]) {
+      if (!Array.isArray(state[name]) || state[name].length > cap) throw new RangeError(`${name} must be a bounded array`);
+    }
+    if (!Array.isArray(state.memories) || state.memories.length > 10000) throw new RangeError("memories must be a bounded array");
+    for (const memory of state.memories) {
+      assertLatent(memory.latent, `memory ${memory.memoryId || "unknown"}.latent`);
+      M.assertFinite(memory.weight, "memory.weight");
+    }
+    for (const node of state.memorySummaries) assertLatent(node.latent, `memorySummaries ${node.nodeId || "unknown"}.latent`);
+    for (const sample of state.trace) {
+      assertLatent(sample.latent, "trace.latent");
+      M.assertVec(sample.smoothedLatent, DIMENSION, "trace.smoothedLatent");
+      M.assertVec(sample.update, DIMENSION, "trace.update");
+      M.assertVec(sample.input, DIMENSION, "trace.input");
+    }
+    for (const frame of state.frames) {
+      for (const key of ["step", "phase", "coherenceScore", "input_strength", "update_magnitude", "smoothing_confidence", "entropy", "drift"]) M.assertFinite(frame[key], `frame.${key}`);
+      if (!Array.isArray(frame.tags) || !frame.tags.includes("tick")) throw new TypeError("frame.tags must contain tick");
+    }
+    if (!state.counters || Object.values(state.counters).some((value) => !Number.isInteger(value) || value < 0)) {
+      throw new TypeError("counters must be non-negative integers");
+    }
+    return state;
+  }
+
+  function stateDigest(state) {
+    return M.contentHash({
+      currentState: state.currentState,
+      smoothedState: state.smoothedState,
+      context: state.context,
+      memories: state.memories,
+      memorySummaries: state.memorySummaries,
+      counters: state.counters,
+      lastUpdate: state.lastUpdate,
+      lastInput: state.lastInput
+    });
+  }
+
+  function stepCoupledPair(stateA, stateB, observationA = {}, observationB = {}, options = {}) {
+    validateStateShape(stateA);
+    validateStateShape(stateB);
+    const requestedStrength = options.strength == null
+      ? Math.min(stateA.config.couplingStrength, stateB.config.couplingStrength)
+      : M.assertFinite(options.strength, "coupling strength");
+    const enabled = options.enabled !== false && stateA.config.mechanisms.coupling && stateB.config.mechanisms.coupling;
+    const strength = enabled ? M.clamp(requestedStrength, 0, 1) : 0;
+    const frozenA = { latent: [...stateA.currentState.latent], hash: stateA.currentHash };
+    const frozenB = { latent: [...stateB.currentState.latent], hash: stateB.currentHash };
+    const couplingA = M.scale(M.sub(frozenB.latent, frozenA.latent), strength);
+    const couplingB = M.scale(M.sub(frozenA.latent, frozenB.latent), strength);
+    const inputA = { ...observationA, couplingVector: couplingA, couplingSourceHash: frozenB.hash };
+    const inputB = { ...observationB, couplingVector: couplingB, couplingSourceHash: frozenA.hash };
+    let resultA;
+    let resultB;
+    if (options.order === "ba") {
+      resultB = step(stateB, inputB);
+      resultA = step(stateA, inputA);
+    } else {
+      resultA = step(stateA, inputA);
+      resultB = step(stateB, inputB);
+    }
+    return {
+      observers: [stateA, stateB],
+      results: [resultA, resultB],
+      coupling: {
+        enabled,
+        strength,
+        sourceHashes: [frozenA.hash, frozenB.hash],
+        magnitudes: [M.norm(couplingA), M.norm(couplingB)],
+        updatePolicy: "frozen snapshot; simultaneous double-buffered inputs",
+        classification: "DEVELOP"
+      }
+    };
+  }
+
+  return {
+    BASINS,
+    DEFAULT_CONFIG,
+    DIMENSION,
+    ENGINE_ID,
+    ENGINE_VERSION,
+    SCHEMA_VERSION,
+    coherenceOf,
+    createConfig,
+    createState,
+    decode,
+    combineStateAndUpdate,
+    computeStateUpdate,
+    hydrate,
+    inscribeMemory,
+    mergeR,
+    nearestBasin,
+    sampleAdaptiveNoise,
+    stateHash,
+    extractCombinedState,
+    queueRecall,
+    recallCandidates,
+    representUpdate,
+    representSmoothedState,
+    requestProjection,
+    sampleInput,
+    serialize,
+    setMechanism,
+    stateDigest,
+    step,
+    stepCoupledPair,
+    storeHistorySummary,
+    validateStateShape,
+    weatherClass
+  };
+});
+
+/* projection.js */
+(function (root, factory) {
+  const math = typeof module === "object" && module.exports ? require("./math.js") : root.MWMath;
+  const api = factory(math);
+  if (typeof module === "object" && module.exports) module.exports = api;
+  else root.MemoryWeatherProjection = api;
+})(typeof globalThis !== "undefined" ? globalThis : this, function (M) {
+  "use strict";
+
+  const DIMENSION = 12;
+  const PROJECTION_VERSION = "mw-fixed-orthonormal/v1";
+  const DEFAULT_PROJECTION_SEED = 0x51a72026;
+
+  function orthonormalBasis(seed = DEFAULT_PROJECTION_SEED, rows = 3) {
+    const basis = [];
+    for (let row = 0; row < rows; row += 1) {
+      let vector = Array.from({ length: DIMENSION }, (_, i) =>
+        M.keyedGaussian(seed, "projection-basis", row, i)
+      );
+      for (const prior of basis) vector = M.sub(vector, M.scale(prior, M.dot(vector, prior)));
+      if (M.norm(vector) < 1e-8) throw new Error("projection basis became degenerate");
+      vector = M.normalize(vector, 1);
+      const firstSignificant = vector.find((value) => Math.abs(value) > 1e-7) || 1;
+      if (firstSignificant < 0) vector = M.scale(vector, -1);
+      basis.push(vector);
+    }
+    return basis;
+  }
+
+  function createProjection(options = {}) {
+    const seed = options.seed == null ? DEFAULT_PROJECTION_SEED : options.seed;
+    if (!Number.isInteger(seed) || seed < 0 || seed > 0xffffffff) {
+      throw new RangeError("projection seed must be an unsigned 32-bit integer");
+    }
+    const matrix3 = options.matrix3 ? options.matrix3.map((row) => [...row]) : orthonormalBasis(seed, 3);
+    validateMatrix(matrix3, 3);
+    const anchor = options.anchor ? [...options.anchor] : Array(DIMENSION).fill(0);
+    M.assertVec(anchor, DIMENSION, "projection anchor");
+    const projection = {
+      projectionId: `r12-${seed.toString(16).padStart(8, "0")}`,
+      version: PROJECTION_VERSION,
+      method: options.matrix3 ? "imported-pinned-basis" : "seed-derived-pinned-basis",
+      seed,
+      sourceDimension: DIMENSION,
+      matrix2: matrix3.slice(0, 2),
+      matrix3,
+      anchor,
+      normalization: "orthonormal rows; viewport maps +/-2.25 to edges",
+      noninvertible: true
+    };
+    projection.matrixHash = M.contentHash({
+      version: projection.version,
+      matrix2: projection.matrix2,
+      matrix3: projection.matrix3,
+      anchor: projection.anchor
+    });
+    return projection;
+  }
+
+  function validateMatrix(matrix, rows) {
+    if (!Array.isArray(matrix) || matrix.length !== rows) throw new TypeError(`projection matrix must have ${rows} rows`);
+    for (let i = 0; i < rows; i += 1) M.assertVec(matrix[i], DIMENSION, `projection matrix row ${i}`);
+    for (let i = 0; i < rows; i += 1) {
+      const lengthError = Math.abs(M.norm(matrix[i]) - 1);
+      if (lengthError > 1e-7) throw new RangeError("projection matrix rows must be unit length");
+      for (let j = i + 1; j < rows; j += 1) {
+        if (Math.abs(M.dot(matrix[i], matrix[j])) > 1e-7) throw new RangeError("projection matrix rows must be orthogonal");
+      }
+    }
+    return matrix;
+  }
+
+  function project(projection, latent, targetDimension = 2) {
+    M.assertVec(latent, DIMENSION, "latent");
+    const matrix = targetDimension === 3 ? projection.matrix3 : projection.matrix2;
+    return M.matrixVector(matrix, M.sub(latent, projection.anchor));
+  }
+
+  function projectVector(projection, vector, targetDimension = 2) {
+    M.assertVec(vector, DIMENSION, "vector");
+    const matrix = targetDimension === 3 ? projection.matrix3 : projection.matrix2;
+    return M.matrixVector(matrix, vector);
+  }
+
+  function lift(projection, coordinates, targetDimension = 2) {
+    const matrix = targetDimension === 3 ? projection.matrix3 : projection.matrix2;
+    if (!Array.isArray(coordinates) || coordinates.length !== matrix.length) {
+      throw new TypeError(`coordinates must have length ${matrix.length}`);
+    }
+    coordinates.forEach((value, i) => M.assertFinite(value, `coordinates[${i}]`));
+    return M.add(projection.anchor, M.transposeVector(matrix, coordinates));
+  }
+
+  function residual(projection, latent, targetDimension = 2) {
+    const coordinates = project(projection, latent, targetDimension);
+    const reconstructed = lift(projection, coordinates, targetDimension);
+    const vector = M.sub(latent, reconstructed);
+    return { vector, norm: M.norm(vector), discardedDimensions: DIMENSION - targetDimension };
+  }
+
+  function viewportToLatent(projection, x, y, radialLimit = 2) {
+    M.assertFinite(x, "viewport x");
+    M.assertFinite(y, "viewport y");
+    return M.boundVector(lift(projection, [x, y], 2), radialLimit, radialLimit);
+  }
+
+  function projectionRecord(projection, latent) {
+    const loss2 = latent ? residual(projection, latent, 2) : null;
+    return {
+      projection_id: projection.projectionId,
+      method: projection.method,
+      version: projection.version,
+      source_dim: DIMENSION,
+      target_dims: [2, 3],
+      matrix_hash: projection.matrixHash,
+      anchor: [...projection.anchor],
+      rank: 3,
+      discarded_nullity_2d: 10,
+      discarded_nullity_3d: 9,
+      live_residual_norm_2d: loss2 ? loss2.norm : null,
+      normalization: projection.normalization,
+      noninvertible: true
+    };
+  }
+
+  function makeFeature(base, details) {
+    return {
+      frame_id: base.frameId,
+      run_id: base.runId,
+      observer_id: base.observerId,
+      tick: base.tick,
+      projection_id: base.projection.projectionId,
+      projection_hash: base.projection.matrixHash,
+      source_state_hash: base.stateHash,
+      canonical: false,
+      ...details
+    };
+  }
+
+  function featureCatalog(projection, state, fieldSpec = {}) {
+    const frame = state.frames[state.frames.length - 1] || null;
+    const base = {
+      frameId: frame ? `${state.runId}:frame:${frame.step}` : null,
+      runId: state.runId,
+      observerId: state.currentState.observerId,
+      tick: state.context.step,
+      projection,
+      stateHash: state.currentHash
+    };
+    const projectionLoss = "2D discards 10 components; 3D discards 9. Projected distances can distort 12D relations.";
+    const commonForbidden = "Do not infer physical space, semantic distance, consciousness, or physical validation from this view.";
+    const records = [
+      makeFeature(base, {
+        feature_id: "currentState-trace",
+        label: "state trajectory",
+        layer: "trace",
+        evidence_class: "state_projection",
+        implementation_refs: ["Current state"],
+        runtime_paths: ["state.trace[].latent", "state.currentState.latent"],
+        transform_chain: ["fixed 12D basis", "viewport affine map"],
+        discarded_information: projectionLoss,
+        permitted_interpretation: "Committed runtime-state motion within this fixed projection.",
+        forbidden_extrapolation: commonForbidden
+      }),
+      makeFeature(base, {
+        feature_id: "currentState-smoothed",
+        label: "Smoothed state",
+        layer: "smoothed",
+        evidence_class: "state_projection",
+        implementation_refs: ["Smoothed state"],
+        runtime_paths: ["state.lastSmoothed.latent"],
+        transform_chain: ["Smoothed state implementation", "same fixed 12D basis"],
+        discarded_information: projectionLoss,
+        permitted_interpretation: "Projected separation between current state and its contractive runtime self-model.",
+        forbidden_extrapolation: "Not a measurement of phenomenal self-awareness."
+      }),
+      makeFeature(base, {
+        feature_id: "update-vectors",
+        label: "Update direction field",
+        layer: "vectors",
+        evidence_class: "derived_visualization",
+        implementation_refs: ["Bounded state update"],
+        runtime_paths: ["state.lastUpdate.vec", "field.grid[].vector"],
+        transform_chain: ["declared Update proxy", "vector projection", "field probe evaluation"],
+        discarded_information: `Orthogonal Update components are hidden. Grid density ${fieldSpec.size || 0} is a display choice.`,
+        permitted_interpretation: "Direction of the declared local update proxy and potential derivative.",
+        forbidden_extrapolation: "A numerical update field in this visualization."
+      }),
+      makeFeature(base, {
+        feature_id: "phi-forcing",
+        label: "Input forcing",
+        layer: "input",
+        evidence_class: "state_projection",
+        implementation_refs: ["Sampled input"],
+        runtime_paths: ["state.lastInput.data", "state.lastInput.energy"],
+        transform_chain: ["runtime input sample", "fixed vector projection"],
+        discarded_information: projectionLoss,
+        permitted_interpretation: "The current runtime forcing vector and scalar energy.",
+        forbidden_extrapolation: commonForbidden
+      }),
+      makeFeature(base, {
+        feature_id: "coherenceScore-field",
+        label: "Coherence score surface",
+        layer: "coherence",
+        evidence_class: "derived_visualization",
+        implementation_refs: ["Coherence score"],
+        runtime_paths: ["state.currentState.coherence", "field.grid[].coherence"],
+        transform_chain: ["pure probe evaluation of implementation-local Coherence", "grid sampling"],
+        discarded_information: "The live engine emits one scalar Coherence per observer; spatial variation is model evaluation, not direct telemetry.",
+        permitted_interpretation: "How the current implementation's Coherence formula changes over the projected slice.",
+        forbidden_extrapolation: "No universal coherence field or threshold is implied."
+      }),
+      makeFeature(base, {
+        feature_id: "attractor-potential",
+        label: "Declared attractor potential",
+        layer: "potential",
+        evidence_class: "derived_visualization",
+        implementation_refs: [],
+        runtime_paths: ["state.memories", "state.memorySummaries", "BASINS", "field.grid[].potential"],
+        transform_chain: ["project nodes", "Gaussian kernel sum", "grid normalization"],
+        discarded_information: "Kernel width, event weights, and projection distortions determine the rendered topology.",
+        permitted_interpretation: "A implementation-local diagnostic landscape over declared basins and memory artifacts.",
+        forbidden_extrapolation: "A visualization of declared numerical potential only."
+      }),
+      makeFeature(base, {
+        feature_id: "memory-influence",
+        label: "Memory influence applied influence",
+        layer: "memory",
+        evidence_class: state.lastInput.recall ? "direct_event" : "derived_visualization",
+        implementation_refs: ["Recalled memory"],
+        runtime_paths: ["state.lastInput.recall", "state.context.pendingRecall"],
+        transform_chain: ["eligible recall selection", "next-tick Input bias", "endpoint projection"],
+        discarded_information: "Only applied or queued packet endpoints and similarity are shown.",
+        permitted_interpretation: state.lastInput.recall ? "An actual recall packet contributed to this tick." : "No Memory influence packet was applied this tick.",
+        forbidden_extrapolation: "Proximity alone is not shown as causal influence."
+      }),
+      makeFeature(base, {
+        feature_id: "projection-surface",
+        label: "Basin projection readiness surface",
+        layer: "projection",
+        evidence_class: "derived_visualization",
+        implementation_refs: ["Basin projection readiness"],
+        runtime_paths: ["config.projectionThreshold", "field.grid[].projectionMargin", "state.context.holdRemaining"],
+        transform_chain: ["actual implementation predicate proxy", "pure grid evaluation", "contour extraction"],
+        discarded_information: "The contour does not carry temporal dwell history at every probe point.",
+        permitted_interpretation: "Instantaneous readiness in this implementation, with live dwell/hold disclosed separately.",
+        forbidden_extrapolation: "A readiness surface derived from this engine configuration."
+      }),
+      makeFeature(base, {
+        feature_id: "event-markers",
+        label: "Event markers",
+        layer: "events",
+        evidence_class: "direct_event",
+        implementation_refs: ["Basin projection event"],
+        runtime_paths: ["state.events"],
+        transform_chain: ["event source-state endpoint", "fixed 12D basis"],
+        discarded_information: projectionLoss,
+        permitted_interpretation: "Integrity-bearing runtime events at their projected source states.",
+        forbidden_extrapolation: "An event marker is not evidence of physical branching."
+      }),
+      makeFeature(base, {
+        feature_id: "multi-observer-coupling",
+        label: "Declared observer coupling",
+        layer: "coupling",
+        evidence_class: "state_projection",
+        implementation_refs: [],
+        runtime_paths: ["observerA.lastInput.coupling", "observerB.lastInput.coupling", "observer*.trace"],
+        transform_chain: ["frozen prior-state difference", "bounded coupling scale", "independent Step ticks", "same fixed 12D basis"],
+        discarded_information: projectionLoss,
+        permitted_interpretation: "A DEVELOP coupling input applied symmetrically from a frozen two-observer snapshot.",
+        forbidden_extrapolation: "A numerical coupling between two simulation instances."
+      }),
+      makeFeature(base, {
+        feature_id: "weather-composite",
+        label: "Memory Weather composite",
+        layer: "weather",
+        evidence_class: "interpretive",
+        implementation_refs: ["Regime classification"],
+        runtime_paths: ["frame.weather", "field.grid", "state.events"],
+        transform_chain: ["deterministic UI classifier", "layer compositing"],
+        discarded_information: "The label compresses many runtime quantities into a metaphor.",
+        permitted_interpretation: "A reproducible interface summary of this implementation's current regime.",
+        forbidden_extrapolation: "Weather names describe combinations of simulation metrics."
+      })
+    ];
+    return Object.fromEntries(records.map((record) => [record.feature_id, record]));
+  }
+
+  return {
+    DEFAULT_PROJECTION_SEED,
+    DIMENSION,
+    PROJECTION_VERSION,
+    createProjection,
+    featureCatalog,
+    lift,
+    orthonormalBasis,
+    project,
+    projectVector,
+    projectionRecord,
+    residual,
+    validateMatrix,
+    viewportToLatent
+  };
+});
+
+/* field.js */
+(function (root, factory) {
+  const math = typeof module === "object" && module.exports ? require("./math.js") : root.MWMath;
+  const engine = typeof module === "object" && module.exports ? require("./engine.js") : root.MemoryWeatherEngine;
+  const projectionApi = typeof module === "object" && module.exports ? require("./projection.js") : root.MemoryWeatherProjection;
+  const api = factory(math, engine, projectionApi);
+  if (typeof module === "object" && module.exports) module.exports = api;
+  else root.MemoryWeatherField = api;
+})(typeof globalThis !== "undefined" ? globalThis : this, function (M, Engine, Projection) {
+  "use strict";
+
+  const DEFAULT_FIELD_SPEC = Object.freeze({
+    size: 45,
+    extent: 2.25,
+    basinSigma: 0.46,
+    memorySigma: 0.34,
+    meshSigma: 0.52,
+    observerSigma: 0.28,
+    vectorCap: 2.2
+  });
+
+  function createFieldSpec(overrides = {}) {
+    const spec = { ...DEFAULT_FIELD_SPEC, ...overrides };
+    if (!Number.isInteger(spec.size) || spec.size < 17 || spec.size > 129) throw new RangeError("field size must be an integer in [17,129]");
+    for (const key of ["extent", "basinSigma", "memorySigma", "meshSigma", "observerSigma", "vectorCap"]) {
+      if (!Number.isFinite(spec[key]) || spec[key] <= 0) throw new RangeError(`${key} must be positive and finite`);
+    }
+    return spec;
+  }
+
+  function gaussian(dx, dy, sigma) {
+    return Math.exp(-(dx * dx + dy * dy) / (2 * sigma * sigma));
+  }
+
+  function collectAttractors(state, projection, spec) {
+    const basins = Engine.BASINS.map((basin) => ({
+      id: `basin:${basin.id}`,
+      label: basin.label,
+      kind: "basin",
+      xy: Projection.project(projection, basin.latent, 2),
+      latent: basin.latent,
+      weight: 0.34,
+      sigma: spec.basinSigma,
+      sourceStatus: "implementation-local"
+    }));
+    const memories = state.memories.map((memory) => ({
+      id: memory.memoryId,
+      label: memory.label,
+      kind: "memory",
+      xy: Projection.project(projection, memory.latent, 2),
+      latent: memory.latent,
+      weight: 0.72 * memory.weight,
+      sigma: spec.memorySigma,
+      sourceStatus: "direct-artifact"
+    }));
+    const memorySummaries = state.memorySummaries.map((node) => ({
+      id: node.nodeId,
+      label: node.nodeId,
+      kind: "memorySummaries",
+      xy: Projection.project(projection, node.latent, 2),
+      latent: node.latent,
+      weight: 0.36 * node.weight,
+      sigma: spec.meshSigma,
+      sourceStatus: "direct-artifact"
+    }));
+    const observer = [{
+      id: `observer:${state.currentState.observerId}`,
+      label: "state",
+      kind: "observer",
+      xy: Projection.project(projection, state.currentState.latent, 2),
+      latent: state.currentState.latent,
+      weight: 0.48 + 0.3 * state.currentState.coherence,
+      sigma: spec.observerSigma,
+      sourceStatus: "direct-telemetry"
+    }];
+    return basins.concat(memories, memorySummaries, observer);
+  }
+
+  function evaluatePotential(x, y, attractors) {
+    let potential = 0;
+    let vx = 0;
+    let vy = 0;
+    for (const attractor of attractors) {
+      const dx = attractor.xy[0] - x;
+      const dy = attractor.xy[1] - y;
+      const kernel = gaussian(dx, dy, attractor.sigma);
+      potential += attractor.weight * kernel;
+      const derivativeScale = attractor.weight * kernel / (attractor.sigma * attractor.sigma);
+      vx += derivativeScale * dx;
+      vy += derivativeScale * dy;
+    }
+    return { potential, vx, vy };
+  }
+
+  function evaluateProbe(state, projection, x, y, baseVector, attractors, spec) {
+    const probe = Projection.viewportToLatent(projection, x, y, state.config.radialLimit);
+    const potential = evaluatePotential(x, y, attractors);
+    let vx = potential.vx + baseVector[0];
+    let vy = potential.vy + baseVector[1];
+    const vectorMagnitude = Math.hypot(vx, vy);
+    if (vectorMagnitude > spec.vectorCap) {
+      const ratio = spec.vectorCap / vectorMagnitude;
+      vx *= ratio;
+      vy *= ratio;
+    }
+    const alignment = (M.cosine(probe, state.lastInput.data) + 1) / 2;
+    const calm = Math.exp(-0.7 * state.lastInput.energy);
+    const focus = Math.exp(-0.55 * Math.hypot(vx, vy));
+    const rawCoherence = 0.5 * alignment + 0.25 * calm + 0.15 * focus + 0.1 * state.currentState.coherence;
+    const coherence = M.clamp((1 - state.config.coherenceEma) * state.currentState.coherence + state.config.coherenceEma * rawCoherence, 0, 1);
+    const separation = M.distance(probe, state.smoothedState);
+    const projectionMargin = state.context.holdRemaining > 0 ? -1 : coherence - state.config.projectionThreshold;
+    let memoryInfluence = 0;
+    if (state.lastInput.recall) {
+      const source = attractors.find((item) => item.id === state.lastInput.recall.memoryId);
+      if (source) memoryInfluence = state.lastInput.recall.similarity * gaussian(source.xy[0] - x, source.xy[1] - y, source.sigma * 1.25);
+    }
+    const front = Math.hypot(potential.vx, potential.vy);
+    const weather = 0.44 * potential.potential + 0.24 * coherence + 0.18 * front + 0.14 * memoryInfluence;
+    return {
+      potential: potential.potential,
+      vx,
+      vy,
+      vectorMagnitude: Math.hypot(vx, vy),
+      coherence,
+      separation,
+      projectionMargin,
+      memoryInfluence,
+      front,
+      weather
+    };
+  }
+
+  function minMax(values) {
+    let min = Infinity;
+    let max = -Infinity;
+    for (const value of values) {
+      if (value < min) min = value;
+      if (value > max) max = value;
+    }
+    return { min, max, span: Math.max(1e-12, max - min) };
+  }
+
+  function normalizeArray(values, range = minMax(values)) {
+    return values.map((value) => (value - range.min) / range.span);
+  }
+
+  function buildField(state, projection, options = {}) {
+    Engine.validateStateShape(state);
+    const spec = createFieldSpec(options);
+    const attractors = collectAttractors(state, projection, spec);
+    const update2 = Projection.projectVector(projection, state.lastUpdate.vec, 2);
+    const input2 = Projection.projectVector(projection, state.lastInput.data, 2);
+    const baseVector = [
+      0.38 * update2[0] + 0.1 * input2[0],
+      0.38 * update2[1] + 0.1 * input2[1]
+    ];
+    const fields = {
+      potential: [],
+      vectorX: [],
+      vectorY: [],
+      vectorMagnitude: [],
+      coherence: [],
+      separation: [],
+      projectionMargin: [],
+      memoryInfluence: [],
+      front: [],
+      weather: []
+    };
+    const coordinates = [];
+    const spacing = (2 * spec.extent) / (spec.size - 1);
+    for (let row = 0; row < spec.size; row += 1) {
+      const y = spec.extent - row * spacing;
+      for (let col = 0; col < spec.size; col += 1) {
+        const x = -spec.extent + col * spacing;
+        const sample = evaluateProbe(state, projection, x, y, baseVector, attractors, spec);
+        coordinates.push([x, y]);
+        fields.potential.push(sample.potential);
+        fields.vectorX.push(sample.vx);
+        fields.vectorY.push(sample.vy);
+        fields.vectorMagnitude.push(sample.vectorMagnitude);
+        fields.coherence.push(sample.coherence);
+        fields.separation.push(sample.separation);
+        fields.projectionMargin.push(sample.projectionMargin);
+        fields.memoryInfluence.push(sample.memoryInfluence);
+        fields.front.push(sample.front);
+        fields.weather.push(sample.weather);
+      }
+    }
+    const ranges = {};
+    const normalized = {};
+    for (const [key, values] of Object.entries(fields)) {
+      ranges[key] = minMax(values);
+      normalized[key] = normalizeArray(values, ranges[key]);
+    }
+    const gridSpecHash = M.contentHash({ spec, projectionHash: projection.matrixHash, stateHash: state.currentHash });
+    const dataHash = M.contentHash({
+      potential: fields.potential,
+      vectorX: fields.vectorX,
+      vectorY: fields.vectorY,
+      coherence: fields.coherence,
+      projectionMargin: fields.projectionMargin,
+      memoryInfluence: fields.memoryInfluence
+    }, 7);
+    return {
+      schema: "mw-field/0.1",
+      spec,
+      gridSpecHash,
+      dataHash,
+      sourceStateHash: state.currentHash,
+      projectionHash: projection.matrixHash,
+      coordinates,
+      fields,
+      normalized,
+      ranges,
+      attractors,
+      live: {
+        currentState: Projection.project(projection, state.currentState.latent, 2),
+        psi3: Projection.project(projection, state.currentState.latent, 3),
+        smoothed: Projection.project(projection, state.smoothedState, 2),
+        update: update2,
+        input: input2,
+        appliedRecall: state.lastInput.recall
+      }
+    };
+  }
+
+  function scalarValues(field, mode) {
+    const key = mode === "coherenceScore" ? "coherence"
+      : mode === "memoryInfluence" ? "memoryInfluence"
+        : mode === "projectionReadiness" ? "projectionMargin"
+          : mode === "fronts" ? "front"
+            : mode;
+    return field.fields[key] || field.fields.weather;
+  }
+
+  function normalizedValues(field, mode) {
+    const key = mode === "coherenceScore" ? "coherence"
+      : mode === "memoryInfluence" ? "memoryInfluence"
+        : mode === "projectionReadiness" ? "projectionMargin"
+          : mode === "fronts" ? "front"
+            : mode;
+    return field.normalized[key] || field.normalized.weather;
+  }
+
+  function sampleAt(field, x, y) {
+    const size = field.spec.size;
+    const u = M.clamp((x + field.spec.extent) / (2 * field.spec.extent), 0, 1);
+    const v = M.clamp((field.spec.extent - y) / (2 * field.spec.extent), 0, 1);
+    const col = Math.round(u * (size - 1));
+    const row = Math.round(v * (size - 1));
+    const index = row * size + col;
+    return {
+      index,
+      row,
+      col,
+      x: field.coordinates[index][0],
+      y: field.coordinates[index][1],
+      potential: field.fields.potential[index],
+      coherence: field.fields.coherence[index],
+      vector: [field.fields.vectorX[index], field.fields.vectorY[index]],
+      projectionMargin: field.fields.projectionMargin[index],
+      memoryInfluence: field.fields.memoryInfluence[index],
+      weather: field.fields.weather[index]
+    };
+  }
+
+  return {
+    DEFAULT_FIELD_SPEC,
+    buildField,
+    collectAttractors,
+    createFieldSpec,
+    evaluatePotential,
+    normalizedValues,
+    sampleAt,
+    scalarValues
+  };
+});
+
+/* renderer.js */
+(function (root, factory) {
+  const math = typeof module === "object" && module.exports ? require("./math.js") : root.MWMath;
+  const projectionApi = typeof module === "object" && module.exports ? require("./projection.js") : root.MemoryWeatherProjection;
+  const fieldApi = typeof module === "object" && module.exports ? require("./field.js") : root.MemoryWeatherField;
+  const api = factory(math, projectionApi, fieldApi);
+  if (typeof module === "object" && module.exports) module.exports = api;
+  else root.MemoryWeatherRenderer = api;
+})(typeof globalThis !== "undefined" ? globalThis : this, function (M, Projection, Field) {
+  "use strict";
+
+  const DEFAULT_LAYERS = Object.freeze({
+    scalar: true,
+    vectors: true,
+    streamlines: true,
+    trace: true,
+    smoothed: true,
+    basins: true,
+    projection: true,
+    memory: true,
+    events: true,
+    grid: true
+  });
+
+  function createRenderer(canvas) {
+    if (!canvas || typeof canvas.getContext !== "function") throw new TypeError("renderer requires a canvas");
+    const context = canvas.getContext("2d", { alpha: false });
+    const offscreen = document.createElement("canvas");
+    return {
+      canvas,
+      context,
+      offscreen,
+      offctx: offscreen.getContext("2d"),
+      width: 1,
+      height: 1,
+      dpr: 1,
+      view: "weather",
+      scalarMode: "weather",
+      layers: { ...DEFAULT_LAYERS },
+      yaw: -0.52,
+      pitch: 0.92,
+      selected: null
+    };
+  }
+
+  function resize(renderer) {
+    const rect = renderer.canvas.getBoundingClientRect();
+    const dpr = Math.min(2.5, window.devicePixelRatio || 1);
+    const width = Math.max(320, Math.round(rect.width * dpr));
+    const height = Math.max(280, Math.round(rect.height * dpr));
+    if (renderer.canvas.width !== width || renderer.canvas.height !== height) {
+      renderer.canvas.width = width;
+      renderer.canvas.height = height;
+      renderer.width = width;
+      renderer.height = height;
+      renderer.dpr = dpr;
+    }
+    return renderer;
+  }
+
+  function setView(renderer, view) {
+    if (!["weather", "field", "terrain"].includes(view)) throw new RangeError("unknown view");
+    renderer.view = view;
+  }
+
+  function setScalarMode(renderer, mode) {
+    renderer.scalarMode = mode;
+  }
+
+  function setLayer(renderer, layer, enabled) {
+    if (!(layer in renderer.layers)) throw new RangeError(`unknown layer ${layer}`);
+    renderer.layers[layer] = Boolean(enabled);
+  }
+
+  function plotRect(renderer) {
+    const pad = Math.max(18, Math.round(24 * renderer.dpr));
+    return { x: pad, y: pad, width: renderer.width - 2 * pad, height: renderer.height - 2 * pad };
+  }
+
+  function fieldToScreen(renderer, field, x, y) {
+    const plot = plotRect(renderer);
+    return [
+      plot.x + ((x + field.spec.extent) / (2 * field.spec.extent)) * plot.width,
+      plot.y + ((field.spec.extent - y) / (2 * field.spec.extent)) * plot.height
+    ];
+  }
+
+  function screenToField(renderer, field, clientX, clientY) {
+    const rect = renderer.canvas.getBoundingClientRect();
+    const px = (clientX - rect.left) * renderer.dpr;
+    const py = (clientY - rect.top) * renderer.dpr;
+    const plot = plotRect(renderer);
+    const u = M.clamp((px - plot.x) / plot.width, 0, 1);
+    const v = M.clamp((py - plot.y) / plot.height, 0, 1);
+    return {
+      x: -field.spec.extent + 2 * field.spec.extent * u,
+      y: field.spec.extent - 2 * field.spec.extent * v
+    };
+  }
+
+  function colorStops(t, weather = false) {
+    const stops = weather
+      ? [[4, 9, 18], [14, 31, 52], [16, 83, 108], [41, 154, 138], [180, 206, 111], [244, 190, 91]]
+      : [[6, 15, 30], [24, 48, 80], [42, 91, 124], [76, 143, 144], [176, 188, 126], [238, 207, 122]];
+    const clamped = M.clamp(t, 0, 1) * (stops.length - 1);
+    const i = Math.min(stops.length - 2, Math.floor(clamped));
+    const amount = clamped - i;
+    const color = stops[i].map((value, channel) => Math.round(value * (1 - amount) + stops[i + 1][channel] * amount));
+    return color;
+  }
+
+  function signedColor(value, maxAbs) {
+    const t = M.clamp(value / Math.max(1e-9, maxAbs), -1, 1);
+    if (t < 0) {
+      const a = -t;
+      return [Math.round(18 + 33 * a), Math.round(31 + 70 * a), Math.round(55 + 110 * a)];
+    }
+    return [Math.round(24 + 226 * t), Math.round(38 + 112 * t), Math.round(54 + 35 * t)];
+  }
+
+  function drawBackground(renderer) {
+    const { context, width, height } = renderer;
+    const computeStateUpdate = context.createLinearGradient(0, 0, width, height);
+    computeStateUpdate.addColorStop(0, "#071019");
+    computeStateUpdate.addColorStop(0.55, "#09131e");
+    computeStateUpdate.addColorStop(1, "#050a11");
+    context.fillStyle = computeStateUpdate;
+    context.fillRect(0, 0, width, height);
+  }
+
+  function drawHeatmap(renderer, field, mode, weather) {
+    const values = Field.normalizedValues(field, mode);
+    const raw = Field.scalarValues(field, mode);
+    const size = field.spec.size;
+    const off = renderer.offscreen;
+    if (off.width !== size || off.height !== size) {
+      off.width = size;
+      off.height = size;
+    }
+    const image = renderer.offctx.createImageData(size, size);
+    const signed = mode === "projectionReadiness";
+    const maxAbs = signed ? Math.max(Math.abs(field.ranges.projectionMargin.min), Math.abs(field.ranges.projectionMargin.max)) : 1;
+    for (let i = 0; i < values.length; i += 1) {
+      const color = signed ? signedColor(raw[i], maxAbs) : colorStops(values[i], weather);
+      const index = i * 4;
+      image.data[index] = color[0];
+      image.data[index + 1] = color[1];
+      image.data[index + 2] = color[2];
+      image.data[index + 3] = 255;
+    }
+    renderer.offctx.putImageData(image, 0, 0);
+    const plot = plotRect(renderer);
+    renderer.context.save();
+    renderer.context.imageSmoothingEnabled = true;
+    renderer.context.globalAlpha = weather ? 0.92 : 0.86;
+    renderer.context.drawImage(off, plot.x, plot.y, plot.width, plot.height);
+    if (weather) {
+      const vignette = renderer.context.createRadialGradient(
+        plot.x + plot.width * 0.5, plot.y + plot.height * 0.45, 0,
+        plot.x + plot.width * 0.5, plot.y + plot.height * 0.5, Math.max(plot.width, plot.height) * 0.68
+      );
+      vignette.addColorStop(0, "rgba(4,8,14,0)");
+      vignette.addColorStop(1, "rgba(3,7,12,.72)");
+      renderer.context.fillStyle = vignette;
+      renderer.context.fillRect(plot.x, plot.y, plot.width, plot.height);
+    }
+    renderer.context.restore();
+  }
+
+  function drawGrid(renderer, field) {
+    const { context } = renderer;
+    const plot = plotRect(renderer);
+    context.save();
+    context.strokeStyle = "rgba(174,202,210,.10)";
+    context.lineWidth = renderer.dpr;
+    for (let i = 0; i <= 8; i += 1) {
+      const x = plot.x + (i / 8) * plot.width;
+      const y = plot.y + (i / 8) * plot.height;
+      context.beginPath(); context.moveTo(x, plot.y); context.lineTo(x, plot.y + plot.height); context.stroke();
+      context.beginPath(); context.moveTo(plot.x, y); context.lineTo(plot.x + plot.width, y); context.stroke();
+    }
+    const origin = fieldToScreen(renderer, field, 0, 0);
+    context.strokeStyle = "rgba(205,224,225,.24)";
+    context.beginPath(); context.moveTo(origin[0], plot.y); context.lineTo(origin[0], plot.y + plot.height); context.stroke();
+    context.beginPath(); context.moveTo(plot.x, origin[1]); context.lineTo(plot.x + plot.width, origin[1]); context.stroke();
+    context.restore();
+  }
+
+  function drawVectors(renderer, field, weather) {
+    const { context } = renderer;
+    const size = field.spec.size;
+    const stride = size > 70 ? 7 : 5;
+    const scale = Math.min(renderer.width, renderer.height) * 0.025;
+    context.save();
+    context.strokeStyle = weather ? "rgba(185,234,226,.46)" : "rgba(217,232,228,.64)";
+    context.fillStyle = context.strokeStyle;
+    context.lineWidth = Math.max(1, renderer.dpr * 0.8);
+    for (let row = Math.floor(stride / 2); row < size; row += stride) {
+      for (let col = Math.floor(stride / 2); col < size; col += stride) {
+        const index = row * size + col;
+        const [x, y] = field.coordinates[index];
+        const [sx, sy] = fieldToScreen(renderer, field, x, y);
+        const vx = field.fields.vectorX[index];
+        const vy = field.fields.vectorY[index];
+        const mag = Math.hypot(vx, vy);
+        if (mag < 0.025) continue;
+        const length = Math.min(scale * 1.8, scale * (0.35 + mag));
+        const ex = sx + (vx / mag) * length;
+        const ey = sy - (vy / mag) * length;
+        context.beginPath(); context.moveTo(sx, sy); context.lineTo(ex, ey); context.stroke();
+        const angle = Math.atan2(ey - sy, ex - sx);
+        const head = 3.3 * renderer.dpr;
+        context.beginPath();
+        context.moveTo(ex, ey);
+        context.lineTo(ex - head * Math.cos(angle - 0.55), ey - head * Math.sin(angle - 0.55));
+        context.lineTo(ex - head * Math.cos(angle + 0.55), ey - head * Math.sin(angle + 0.55));
+        context.closePath(); context.fill();
+      }
+    }
+    context.restore();
+  }
+
+  function vectorAt(field, x, y) {
+    const sample = Field.sampleAt(field, x, y);
+    return sample.vector;
+  }
+
+  function drawStreamlines(renderer, field, state, weather) {
+    const { context } = renderer;
+    const extent = field.spec.extent;
+    context.save();
+    context.lineWidth = Math.max(0.8, renderer.dpr * 0.62);
+    for (let line = 0; line < 26; line += 1) {
+      let x = (M.keyedUniform(state.config.seed, "render-stream", line, 0) * 2 - 1) * extent;
+      let y = (M.keyedUniform(state.config.seed, "render-stream", line, 1) * 2 - 1) * extent;
+      const alpha = 0.16 + 0.2 * M.keyedUniform(state.config.seed, "render-stream", line, 2);
+      context.strokeStyle = weather ? `rgba(170,235,225,${alpha})` : `rgba(224,234,222,${alpha * 0.86})`;
+      context.beginPath();
+      for (let segment = 0; segment < 38; segment += 1) {
+        const point = fieldToScreen(renderer, field, x, y);
+        if (segment === 0) context.moveTo(point[0], point[1]); else context.lineTo(point[0], point[1]);
+        const [vx, vy] = vectorAt(field, x, y);
+        const mag = Math.hypot(vx, vy);
+        if (mag < 1e-4) break;
+        x += (vx / mag) * 0.045;
+        y += (vy / mag) * 0.045;
+        if (Math.abs(x) > extent || Math.abs(y) > extent) break;
+      }
+      context.stroke();
+    }
+    context.restore();
+  }
+
+  function drawFronts(renderer, field) {
+    const { context } = renderer;
+    const size = field.spec.size;
+    const values = field.normalized.front;
+    context.save();
+    context.strokeStyle = "rgba(245,189,114,.40)";
+    context.lineWidth = Math.max(1, renderer.dpr * 0.85);
+    for (let row = 0; row < size - 1; row += 1) {
+      for (let col = 0; col < size - 1; col += 1) {
+        const index = row * size + col;
+        if (values[index] < 0.54) continue;
+        const [x, y] = field.coordinates[index];
+        const point = fieldToScreen(renderer, field, x, y);
+        const next = fieldToScreen(renderer, field, field.coordinates[index + 1][0], field.coordinates[index + 1][1]);
+        context.beginPath(); context.moveTo(point[0], point[1]); context.lineTo(next[0], next[1]); context.stroke();
+      }
+    }
+    context.restore();
+  }
+
+  function drawProjectionContour(renderer, field) {
+    const { context } = renderer;
+    const size = field.spec.size;
+    const values = field.fields.projectionMargin;
+    context.save();
+    context.strokeStyle = "rgba(255,139,94,.82)";
+    context.setLineDash([6 * renderer.dpr, 5 * renderer.dpr]);
+    context.lineWidth = Math.max(1.2, renderer.dpr);
+    for (let row = 0; row < size - 1; row += 1) {
+      for (let col = 0; col < size - 1; col += 1) {
+        const i = row * size + col;
+        const corners = [values[i], values[i + 1], values[i + size], values[i + size + 1]];
+        if (!(Math.min(...corners) <= 0 && Math.max(...corners) >= 0)) continue;
+        const [x, y] = field.coordinates[i];
+        const [x2, y2] = field.coordinates[i + size + 1];
+        const a = fieldToScreen(renderer, field, x, y);
+        const b = fieldToScreen(renderer, field, x2, y2);
+        context.strokeRect(a[0], a[1], b[0] - a[0], b[1] - a[1]);
+      }
+    }
+    context.restore();
+  }
+
+  // Keep longer descriptive marker labels legible in dense regions. Geometry
+  // and field values are unchanged; labels shift vertically with leader lines.
+  function drawMarkerLabel(context, text, x, y, dpr) {
+    const boxes = context.markerLabelBoxes || (context.markerLabelBoxes = []);
+    const width = context.measureText(text).width + 8 * dpr;
+    const height = 14 * dpr;
+    let top = y - height;
+    const left = Math.max(6 * dpr, Math.min(context.canvas.width - width - 6 * dpr,
+      context.textAlign === "center" ? x - width / 2 : x));
+    let attempts = 0;
+    while (boxes.some(b => left < b.right && left + width > b.left && top < b.bottom && top + height > b.top) && attempts++ < 16) top -= height + 3 * dpr;
+    top = Math.max(6 * dpr, top);
+    boxes.push({ left, right: left + width, top, bottom: top + height });
+    context.save();
+    if (Math.abs(top + height - y) > 4 * dpr) {
+      context.globalAlpha = 0.45;
+      context.strokeStyle = context.fillStyle;
+      context.beginPath(); context.moveTo(x, y); context.lineTo(left + width / 2, top + height); context.stroke();
+      context.globalAlpha = 1;
+    }
+    context.textAlign = "left"; context.textBaseline = "bottom";
+    context.fillText(text, left + 4 * dpr, top + height);
+    context.restore();
+  }
+
+  function drawAttractors(renderer, field) {
+    const { context } = renderer;
+    context.save();
+    context.textAlign = "center";
+    context.textBaseline = "bottom";
+    context.font = `${11 * renderer.dpr}px ui-monospace, SFMono-Regular, Menlo, monospace`;
+    for (const attractor of field.attractors) {
+      if (attractor.kind === "observer") continue;
+      if (attractor.kind === "basin" && !renderer.layers.basins) continue;
+      if ((attractor.kind === "memory" || attractor.kind === "memorySummaries") && !renderer.layers.memory) continue;
+      const [x, y] = fieldToScreen(renderer, field, attractor.xy[0], attractor.xy[1]);
+      if (attractor.kind === "basin") {
+        context.strokeStyle = "rgba(164,182,188,.42)";
+        context.fillStyle = "rgba(164,182,188,.72)";
+        context.beginPath();
+        for (let k = 0; k < 6; k += 1) {
+          const angle = (Math.PI * 2 * k) / 6;
+          const px = x + Math.cos(angle) * 5 * renderer.dpr;
+          const py = y + Math.sin(angle) * 5 * renderer.dpr;
+          if (k === 0) context.moveTo(px, py); else context.lineTo(px, py);
+        }
+        context.closePath(); context.stroke();
+      } else {
+        context.fillStyle = attractor.kind === "memory" ? "#f0c57c" : "#88bdb4";
+        context.beginPath(); context.arc(x, y, attractor.kind === "memory" ? 4.2 * renderer.dpr : 3 * renderer.dpr, 0, Math.PI * 2); context.fill();
+        if (attractor.kind === "memory") drawMarkerLabel(context, attractor.label.slice(0, 18), x, y - 7 * renderer.dpr, renderer.dpr);
+      }
+    }
+    context.restore();
+  }
+
+  function drawTrace(renderer, field, state, projection) {
+    const trace = state.trace.slice(-160);
+    if (trace.length < 2) return;
+    const { context } = renderer;
+    context.save();
+    context.lineCap = "round";
+    context.lineJoin = "round";
+    context.lineWidth = Math.max(1.6, renderer.dpr * 1.35);
+    const computeStateUpdate = context.createLinearGradient(0, 0, renderer.width, renderer.height);
+    computeStateUpdate.addColorStop(0, "rgba(100,195,208,.15)");
+    computeStateUpdate.addColorStop(1, "rgba(205,247,229,.92)");
+    context.strokeStyle = computeStateUpdate;
+    context.beginPath();
+    trace.forEach((item, index) => {
+      const xy = Projection.project(projection, item.latent, 2);
+      const point = fieldToScreen(renderer, field, xy[0], xy[1]);
+      if (index === 0) context.moveTo(point[0], point[1]); else context.lineTo(point[0], point[1]);
+    });
+    context.stroke();
+    context.restore();
+  }
+
+  function drawStateMarkers(renderer, field, state) {
+    const { context } = renderer;
+    const currentState = fieldToScreen(renderer, field, field.live.currentState[0], field.live.currentState[1]);
+    const smoothed = fieldToScreen(renderer, field, field.live.smoothed[0], field.live.smoothed[1]);
+    context.save();
+    if (renderer.layers.smoothed) {
+      context.strokeStyle = "rgba(242,184,99,.8)";
+      context.setLineDash([5 * renderer.dpr, 4 * renderer.dpr]);
+      context.lineWidth = Math.max(1, renderer.dpr);
+      context.beginPath(); context.moveTo(currentState[0], currentState[1]); context.lineTo(smoothed[0], smoothed[1]); context.stroke();
+      context.setLineDash([]);
+      context.strokeStyle = "#f1b768";
+      context.beginPath(); context.arc(smoothed[0], smoothed[1], 7 * renderer.dpr, 0, Math.PI * 2); context.stroke();
+    }
+    context.shadowColor = "rgba(139,240,219,.85)";
+    context.shadowBlur = 14 * renderer.dpr;
+    context.fillStyle = "#dffcf3";
+    context.beginPath(); context.arc(currentState[0], currentState[1], 5.6 * renderer.dpr, 0, Math.PI * 2); context.fill();
+    context.shadowBlur = 0;
+    drawTelemetryArrow(context, currentState, field.live.update, "#b9f1e4", "Update", renderer.dpr, 34);
+    drawTelemetryArrow(context, currentState, field.live.input, "#75b5dc", "Input", renderer.dpr, 24);
+    context.fillStyle = "#dffcf3";
+    context.font = `${11 * renderer.dpr}px ui-monospace, SFMono-Regular, Menlo, monospace`;
+    drawMarkerLabel(context, "Current state", currentState[0] + 9 * renderer.dpr, currentState[1] - 8 * renderer.dpr, renderer.dpr);
+    context.fillStyle = "#f1b768";
+    drawMarkerLabel(context, "Smoothed state", smoothed[0] + 9 * renderer.dpr, smoothed[1] + 13 * renderer.dpr, renderer.dpr);
+    context.restore();
+  }
+
+  function drawTelemetryArrow(context, origin, vector, color, label, dpr, scale) {
+    const magnitude = Math.hypot(vector[0], vector[1]);
+    if (magnitude < 0.015) return;
+    const capped = Math.min(72 * dpr, magnitude * scale * dpr);
+    const ex = origin[0] + (vector[0] / magnitude) * capped;
+    const ey = origin[1] - (vector[1] / magnitude) * capped;
+    const angle = Math.atan2(ey - origin[1], ex - origin[0]);
+    context.strokeStyle = color;
+    context.fillStyle = color;
+    context.lineWidth = 1.4 * dpr;
+    context.beginPath(); context.moveTo(origin[0], origin[1]); context.lineTo(ex, ey); context.stroke();
+    context.beginPath();
+    context.moveTo(ex, ey);
+    context.lineTo(ex - 5 * dpr * Math.cos(angle - 0.5), ey - 5 * dpr * Math.sin(angle - 0.5));
+    context.lineTo(ex - 5 * dpr * Math.cos(angle + 0.5), ey - 5 * dpr * Math.sin(angle + 0.5));
+    context.closePath(); context.fill();
+    context.font = `${10 * dpr}px ui-monospace, SFMono-Regular, Menlo, monospace`;
+    drawMarkerLabel(context, label, ex + 4 * dpr, ey - 4 * dpr, dpr);
+  }
+
+  function drawPeer(renderer, field, state, peerState, projection) {
+    if (!peerState) return;
+    const { context } = renderer;
+    const trace = peerState.trace.slice(-160);
+    context.save();
+    if (trace.length > 1 && renderer.layers.trace) {
+      context.strokeStyle = "rgba(102,169,212,.72)";
+      context.lineWidth = Math.max(1.3, renderer.dpr * 1.1);
+      context.beginPath();
+      trace.forEach((item, index) => {
+        const xy = Projection.project(projection, item.latent, 2);
+        const point = fieldToScreen(renderer, field, xy[0], xy[1]);
+        if (index === 0) context.moveTo(point[0], point[1]); else context.lineTo(point[0], point[1]);
+      });
+      context.stroke();
+    }
+    const peerXY = Projection.project(projection, peerState.currentState.latent, 2);
+    const peer = fieldToScreen(renderer, field, peerXY[0], peerXY[1]);
+    const primary = fieldToScreen(renderer, field, field.live.currentState[0], field.live.currentState[1]);
+    if (peerState.lastInput.coupling && peerState.lastInput.coupling.applied) {
+      context.strokeStyle = "rgba(105,169,212,.62)";
+      context.setLineDash([7 * renderer.dpr, 5 * renderer.dpr]);
+      context.lineWidth = renderer.dpr;
+      context.beginPath(); context.moveTo(primary[0], primary[1]); context.lineTo(peer[0], peer[1]); context.stroke();
+      context.setLineDash([]);
+      context.fillStyle = "rgba(166,207,229,.88)";
+      context.font = `${9 * renderer.dpr}px ui-monospace, SFMono-Regular, Menlo, monospace`;
+      context.fillText("declared coupling", (primary[0] + peer[0]) / 2 + 5 * renderer.dpr, (primary[1] + peer[1]) / 2 - 5 * renderer.dpr);
+    }
+    context.fillStyle = "#69a9d4";
+    context.strokeStyle = "rgba(214,239,252,.85)";
+    context.lineWidth = renderer.dpr;
+    context.beginPath(); context.arc(peer[0], peer[1], 5.4 * renderer.dpr, 0, Math.PI * 2); context.fill(); context.stroke();
+    context.fillStyle = "#a6cfe5";
+    context.font = `${11 * renderer.dpr}px ui-monospace, SFMono-Regular, Menlo, monospace`;
+    context.fillText("state B", peer[0] + 9 * renderer.dpr, peer[1] - 8 * renderer.dpr);
+    context.restore();
+  }
+
+  function drawRecall(renderer, field) {
+    if (!field.live.appliedRecall) return;
+    const source = field.attractors.find((item) => item.id === field.live.appliedRecall.memoryId);
+    if (!source) return;
+    const { context } = renderer;
+    const a = fieldToScreen(renderer, field, source.xy[0], source.xy[1]);
+    const b = fieldToScreen(renderer, field, field.live.currentState[0], field.live.currentState[1]);
+    context.save();
+    context.strokeStyle = "rgba(245,200,116,.88)";
+    context.lineWidth = 1.5 * renderer.dpr;
+    context.setLineDash([3 * renderer.dpr, 4 * renderer.dpr]);
+    context.beginPath(); context.moveTo(a[0], a[1]); context.quadraticCurveTo((a[0] + b[0]) / 2, Math.min(a[1], b[1]) - 36 * renderer.dpr, b[0], b[1]); context.stroke();
+    context.setLineDash([]);
+    context.fillStyle = "#f6ce83";
+    context.font = `${10 * renderer.dpr}px ui-monospace, SFMono-Regular, Menlo, monospace`;
+    drawMarkerLabel(context, "Memory influence", (a[0] + b[0]) / 2, (a[1] + b[1]) / 2 - 12 * renderer.dpr, renderer.dpr);
+    context.restore();
+  }
+
+  function drawSelection(renderer, field) {
+    if (!renderer.selected) return;
+    const { context } = renderer;
+    const point = fieldToScreen(renderer, field, renderer.selected.x, renderer.selected.y);
+    context.save();
+    context.strokeStyle = "rgba(232,247,241,.88)";
+    context.lineWidth = renderer.dpr;
+    context.beginPath(); context.arc(point[0], point[1], 11 * renderer.dpr, 0, Math.PI * 2); context.stroke();
+    context.beginPath(); context.moveTo(point[0] - 16 * renderer.dpr, point[1]); context.lineTo(point[0] + 16 * renderer.dpr, point[1]); context.stroke();
+    context.beginPath(); context.moveTo(point[0], point[1] - 16 * renderer.dpr); context.lineTo(point[0], point[1] + 16 * renderer.dpr); context.stroke();
+    context.restore();
+  }
+
+  function drawEventPulses(renderer, field, state) {
+    const { context } = renderer;
+    const recent = state.events.filter((event) => event.kind === "projection").slice(-8);
+    context.save();
+    for (const event of recent) {
+      const basin = field.attractors.find((item) => item.id === `basin:${event.basinId}`);
+      if (!basin) continue;
+      const point = fieldToScreen(renderer, field, basin.xy[0], basin.xy[1]);
+      const age = Math.max(0, state.context.step - event.step);
+      const radius = (9 + Math.min(22, age * 1.6)) * renderer.dpr;
+      context.strokeStyle = `rgba(255,132,91,${Math.max(0.16, 0.8 - age * 0.045)})`;
+      context.lineWidth = Math.max(1, renderer.dpr);
+      context.beginPath(); context.arc(point[0], point[1], radius, 0, Math.PI * 2); context.stroke();
+    }
+    context.restore();
+  }
+
+  function drawDecorativeParticles(renderer, field, state) {
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const { context } = renderer;
+    context.save();
+    for (let i = 0; i < 46; i += 1) {
+      const phase = state.context.step * 0.018 + i * 0.37;
+      const baseX = (M.keyedUniform(state.config.seed, "decorative", i, 0) * 2 - 1) * field.spec.extent;
+      const baseY = (M.keyedUniform(state.config.seed, "decorative", i, 1) * 2 - 1) * field.spec.extent;
+      const x = M.clamp(baseX + 0.08 * Math.cos(phase), -field.spec.extent, field.spec.extent);
+      const y = M.clamp(baseY + 0.08 * Math.sin(phase * 0.83), -field.spec.extent, field.spec.extent);
+      const point = fieldToScreen(renderer, field, x, y);
+      const sample = Field.sampleAt(field, x, y);
+      const alpha = 0.06 + 0.16 * M.clamp(sample.weather, 0, 1);
+      context.fillStyle = `rgba(180,241,226,${alpha})`;
+      context.beginPath(); context.arc(point[0], point[1], (0.8 + 1.6 * alpha) * renderer.dpr, 0, Math.PI * 2); context.fill();
+    }
+    context.restore();
+  }
+
+  function terrainPoint(renderer, field, x, y, z) {
+    const yaw = renderer.yaw;
+    const pitch = renderer.pitch;
+    const rx = x * Math.cos(yaw) - y * Math.sin(yaw);
+    const ry = x * Math.sin(yaw) + y * Math.cos(yaw);
+    const depth = ry * Math.sin(pitch) + z * Math.cos(pitch);
+    const vertical = ry * Math.cos(pitch) - z * Math.sin(pitch);
+    const scale = Math.min(renderer.width, renderer.height) * 0.19;
+    return {
+      x: renderer.width * 0.5 + rx * scale,
+      y: renderer.height * 0.56 + vertical * scale,
+      depth
+    };
+  }
+
+  function drawTerrain(renderer, field, state, projection, peerState = null) {
+    const { context } = renderer;
+    const size = field.spec.size;
+    const values = Field.normalizedValues(field, renderer.scalarMode);
+    const quads = [];
+    for (let row = 0; row < size - 1; row += 1) {
+      for (let col = 0; col < size - 1; col += 1) {
+        const i = row * size + col;
+        const ids = [i, i + 1, i + size + 1, i + size];
+        const points = ids.map((id) => {
+          const [x, y] = field.coordinates[id];
+          return terrainPoint(renderer, field, x, y, values[id] * 1.25 - 0.34);
+        });
+        quads.push({ points, value: ids.reduce((sum, id) => sum + values[id], 0) / 4, depth: points.reduce((sum, p) => sum + p.depth, 0) / 4 });
+      }
+    }
+    quads.sort((a, b) => a.depth - b.depth);
+    context.save();
+    for (const quad of quads) {
+      const c = colorStops(quad.value, renderer.scalarMode === "weather");
+      context.fillStyle = `rgba(${c[0]},${c[1]},${c[2]},.91)`;
+      context.strokeStyle = "rgba(203,229,223,.075)";
+      context.lineWidth = Math.max(0.4, renderer.dpr * 0.36);
+      context.beginPath();
+      quad.points.forEach((point, index) => index ? context.lineTo(point.x, point.y) : context.moveTo(point.x, point.y));
+      context.closePath(); context.fill(); context.stroke();
+    }
+    if (renderer.layers.trace && state.trace.length > 1) {
+      context.strokeStyle = "rgba(226,255,246,.95)";
+      context.lineWidth = 2 * renderer.dpr;
+      context.beginPath();
+      state.trace.slice(-140).forEach((item, index) => {
+        const xyz = Projection.project(projection, item.latent, 3);
+        const point = terrainPoint(renderer, field, xyz[0], xyz[1], xyz[2] * 0.58);
+        if (index === 0) context.moveTo(point.x, point.y); else context.lineTo(point.x, point.y);
+      });
+      context.stroke();
+    }
+    if (peerState && renderer.layers.trace && peerState.trace.length > 1) {
+      context.strokeStyle = "rgba(105,169,212,.8)";
+      context.lineWidth = 1.6 * renderer.dpr;
+      context.beginPath();
+      peerState.trace.slice(-140).forEach((item, index) => {
+        const xyz = Projection.project(projection, item.latent, 3);
+        const point = terrainPoint(renderer, field, xyz[0], xyz[1], xyz[2] * 0.58);
+        if (index === 0) context.moveTo(point.x, point.y); else context.lineTo(point.x, point.y);
+      });
+      context.stroke();
+    }
+    const drawProjectedMarker = (runtimeState, color, label) => {
+      const xyz = Projection.project(projection, runtimeState.currentState.latent, 3);
+      const point = terrainPoint(renderer, field, xyz[0], xyz[1], xyz[2] * 0.58);
+      context.fillStyle = color;
+      context.shadowColor = color;
+      context.shadowBlur = 12 * renderer.dpr;
+      context.beginPath(); context.arc(point.x, point.y, 5.5 * renderer.dpr, 0, Math.PI * 2); context.fill();
+      context.shadowBlur = 0;
+      context.font = `${10 * renderer.dpr}px ui-monospace, SFMono-Regular, Menlo, monospace`;
+      context.fillText(label, point.x + 8 * renderer.dpr, point.y - 8 * renderer.dpr);
+    };
+    drawProjectedMarker(state, "#dffcf3", "state  /  12DtoR3");
+    if (peerState) drawProjectedMarker(peerState, "#69a9d4", "state B");
+    context.restore();
+  }
+
+  function drawHud(renderer, field, state) {
+    const { context } = renderer;
+    const frame = state.frames[state.frames.length - 1];
+    const title = renderer.view === "terrain" ? "3D scalar terrain" : renderer.view === "field" ? "2D observer-field slice" : "Memory Weather composite";
+    context.save();
+    context.fillStyle = "rgba(4,10,16,.72)";
+    context.strokeStyle = "rgba(194,219,216,.13)";
+    context.lineWidth = renderer.dpr;
+    const x = 36 * renderer.dpr;
+    const y = 34 * renderer.dpr;
+    const w = 250 * renderer.dpr;
+    const h = 57 * renderer.dpr;
+    roundRect(context, x, y, w, h, 10 * renderer.dpr); context.fill(); context.stroke();
+    context.fillStyle = "#dff3ef";
+    context.font = `600 ${12 * renderer.dpr}px system-ui, sans-serif`;
+    context.fillText(title, x + 13 * renderer.dpr, y + 21 * renderer.dpr);
+    context.fillStyle = "#87a19f";
+    context.font = `${10 * renderer.dpr}px ui-monospace, SFMono-Regular, Menlo, monospace`;
+    const status = frame ? `${frame.weather.label}  /  t${frame.step}  /  ${field.dataHash.slice(-8)}` : `initial  /  ${field.dataHash.slice(-8)}`;
+    context.fillText(status, x + 13 * renderer.dpr, y + 41 * renderer.dpr);
+    context.restore();
+  }
+
+  function roundRect(context, x, y, width, height, radius) {
+    const r = Math.min(radius, width / 2, height / 2);
+    context.beginPath();
+    context.moveTo(x + r, y);
+    context.arcTo(x + width, y, x + width, y + height, r);
+    context.arcTo(x + width, y + height, x, y + height, r);
+    context.arcTo(x, y + height, x, y, r);
+    context.arcTo(x, y, x + width, y, r);
+    context.closePath();
+  }
+
+  function render(renderer, field, state, projection, peerState = null) {
+    resize(renderer);
+    renderer.context.markerLabelBoxes = [];
+    drawBackground(renderer);
+    if (renderer.view === "terrain") {
+      drawTerrain(renderer, field, state, projection, peerState);
+    } else {
+      const weather = renderer.view === "weather";
+      if (renderer.layers.scalar) drawHeatmap(renderer, field, renderer.scalarMode, weather);
+      if (renderer.layers.grid && !weather) drawGrid(renderer, field);
+      if (renderer.layers.streamlines) drawStreamlines(renderer, field, state, weather);
+      if (renderer.layers.vectors) drawVectors(renderer, field, weather);
+      if (renderer.scalarMode === "fronts") drawFronts(renderer, field);
+      if (renderer.layers.projection) drawProjectionContour(renderer, field);
+      if (renderer.layers.basins || renderer.layers.memory) drawAttractors(renderer, field);
+      if (renderer.layers.trace) drawTrace(renderer, field, state, projection);
+      if (renderer.layers.memory) drawRecall(renderer, field);
+      if (renderer.layers.events) drawEventPulses(renderer, field, state);
+      drawPeer(renderer, field, state, peerState, projection);
+      drawStateMarkers(renderer, field, state);
+      drawSelection(renderer, field);
+      if (weather) drawDecorativeParticles(renderer, field, state);
+    }
+    drawHud(renderer, field, state);
+  }
+
+  return {
+    DEFAULT_LAYERS,
+    createRenderer,
+    fieldToScreen,
+    render,
+    resize,
+    screenToField,
+    setLayer,
+    setScalarMode,
+    setView
+  };
+});
+
+/* app.js */
+(function () {
+  "use strict";
+
+  const Engine = window.MemoryWeatherEngine;
+  const Projection = window.MemoryWeatherProjection;
+  const Field = window.MemoryWeatherField;
+  const Renderer = window.MemoryWeatherRenderer;
+  const M = window.MWMath;
+
+  const WEATHER_PRESENTATION = Object.freeze({
+    initial: {
+      label: "No measured regime",
+      rationale: "No committed simulation tick is available yet."
+    },
+    "projection-clearing": {
+      label: "Commitment event registered",
+      rationale: "A basin projection was applied and recorded on this tick."
+    },
+    "stable-high": {
+      label: "Coherent low-update regime",
+      rationale: "Coherence is high while update magnitude remains low."
+    },
+    "shear-front": {
+      label: "High-drive regime",
+      rationale: "Input strength and update magnitude are elevated."
+    },
+    "projection-watch": {
+      label: "Commitment condition active",
+      rationale: "The Basin projection readiness condition is active; dwell or hold rules may still prevent commitment."
+    },
+    "memory-front": {
+      label: "Recall-influenced regime",
+      rationale: "A memory replay packet Memory influence is influencing the current update."
+    },
+    variable: {
+      label: "Mixed dynamical regime",
+      rationale: "No specialized deterministic regime rule matched the current telemetry."
+    }
+  });
+
+  const FEATURE_LABELS = Object.freeze({
+    "weather-composite": "Regime composite",
+    "attractor-potential": "Attractor potential",
+    "coherenceScore-field": "Coherence field Coherence",
+    "update-vectors": "Context-conditioned update Update",
+    "memory-influence": "Memory influence",
+    "projection-surface": "Basin projection readiness",
+    "currentState-smoothed": "State-to-smoothed distance",
+    "event-markers": "Recorded events",
+    "multi-observer-coupling": "Coupled simulations"
+  });
+
+  function presentWeather(weather) {
+    const source = weather || {
+      id: "initial",
+      label: "Unformed field",
+      rationale: "No committed tick yet"
+    };
+    const presentation = WEATHER_PRESENTATION[source.id] || {
+      label: source.label || "Measured regime",
+      rationale: source.rationale || "Derived from the current telemetry."
+    };
+    return {
+      ...presentation,
+      alias: source.label || source.id || "Unformed field"
+    };
+  }
+
+  const byId = (id) => document.getElementById(id);
+  const canvas = byId("fieldCanvas");
+  const renderer = Renderer.createRenderer(canvas);
+  let projection = Projection.createProjection();
+  let state = Engine.createState({ seed: Number(byId("seedInput").value) });
+  let peerState = null;
+  let field = Field.buildField(state, projection);
+  let catalog = Projection.featureCatalog(projection, state, field.spec);
+  let running = false;
+  let runTimer = null;
+  let dirty = true;
+  let selectedEvent = null;
+  let currentForcing = null;
+  let lastFrameAt = performance.now();
+  let renderedFrames = 0;
+  let measuredFps = 0;
+  let toastTimer = null;
+  let pointerState = null;
+
+  function format(value, digits = 3) {
+    return Number.isFinite(value) ? value.toFixed(digits) : " - ";
+  }
+
+  function shortHash(hash) {
+    if (!hash) return " - ";
+    return hash.replace("mw-fnv64:", "").slice(-10);
+  }
+
+  function setText(id, value) {
+    byId(id).textContent = String(value);
+  }
+
+  function setMeter(valueId, barId, value, scale = 1) {
+    setText(valueId, format(value));
+    byId(barId).style.width = `${M.clamp(value / scale, 0, 1) * 100}%`;
+  }
+
+  function showToast(message) {
+    const toast = byId("toast");
+    toast.textContent = message;
+    toast.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { toast.hidden = true; }, 3200);
+  }
+
+  function announce(message) {
+    byId("liveRegion").textContent = message;
+  }
+
+  function latestFrame() {
+    return state.frames[state.frames.length - 1] || null;
+  }
+
+  function rebuildField() {
+    const size = window.innerWidth < 560 ? 35 : window.innerWidth > 1800 ? 57 : 45;
+    field = Field.buildField(state, projection, { size });
+    catalog = Projection.featureCatalog(projection, state, field.spec);
+    syncFeatureOptions();
+    dirty = true;
+  }
+
+  function observationFromControls() {
+    return {
+      stimulusMode: byId("stimulusSelect").value,
+      stimulusAmplitude: Number(byId("amplitudeRange").value),
+      selectedBasin: Number(byId("basinSelect").value),
+      forcingVector: currentForcing ? currentForcing.latent : null,
+      forcingLabel: currentForcing ? currentForcing.label : null
+    };
+  }
+
+  function executeStep() {
+    const observation = observationFromControls();
+    const result = peerState
+      ? Engine.stepCoupledPair(state, peerState, observation, observation, {
+        strength: Number(byId("couplingRange").value),
+        enabled: true
+      }).results[0]
+      : Engine.step(state, observation);
+    rebuildField();
+    updateUi();
+    if (result.frame.projection_triggered) {
+      const event = result.events.find((item) => item.kind === "projection");
+      const message = `Basin projection registered at tick ${result.frame.step}, attractor region ${event ? event.basinLabel : "unknown"}.`;
+      announce(message);
+      showToast(message);
+    }
+    return result;
+  }
+
+  function scheduleRun() {
+    clearTimeout(runTimer);
+    if (!running) return;
+    const delay = Number(byId("speedSelect").value);
+    runTimer = setTimeout(() => {
+      executeStep();
+      scheduleRun();
+    }, delay);
+  }
+
+  function setRunning(value) {
+    running = Boolean(value);
+    const button = byId("runBtn");
+    button.setAttribute("aria-pressed", String(running));
+    button.innerHTML = running ? '<span aria-hidden="true">Pause</span> Pause' : '<span aria-hidden="true">&gt;</span> Run';
+    const status = byId("runStatus");
+    status.textContent = running ? "running" : "paused";
+    status.classList.toggle("running", running);
+    scheduleRun();
+  }
+
+  function configFromControls(seed) {
+    const mechanisms = {};
+    document.querySelectorAll("[data-ablation]").forEach((input) => {
+      mechanisms[input.dataset.ablation] = input.checked;
+    });
+    return {
+      seed,
+      stimulusMode: byId("stimulusSelect").value,
+      stimulusAmplitude: Number(byId("amplitudeRange").value),
+      selectedBasin: Number(byId("basinSelect").value),
+      mechanisms,
+      couplingStrength: Number(byId("couplingRange").value)
+    };
+  }
+
+  function resetEngine() {
+    setRunning(false);
+    const seed = Number(byId("seedInput").value);
+    try {
+      state = Engine.createState(configFromControls(seed));
+      peerState = byId("peerToggle").checked
+        ? Engine.createState({ config: configFromControls((seed + 1) >>> 0), observerId: "observer-b" })
+        : null;
+      currentForcing = null;
+      renderer.selected = null;
+      selectedEvent = null;
+      rebuildField();
+      updateUi();
+      showToast(`Reset with seed ${seed}.`);
+    } catch (error) {
+      showToast(error.message);
+    }
+  }
+
+  function loadDemo() {
+    setRunning(false);
+    const demoSeed = 12062026;
+    byId("seedInput").value = String(demoSeed);
+    state = Engine.createState(configFromControls(demoSeed));
+    peerState = null;
+    byId("peerToggle").checked = false;
+    currentForcing = null;
+    renderer.selected = null;
+    selectedEvent = null;
+    Engine.inscribeMemory(state, "observer field", 1.15);
+    Engine.inscribeMemory(state, "projection provenance", 0.95);
+    Engine.inscribeMemory(state, "memory front", 0.78);
+    for (let tick = 0; tick < 96; tick += 1) {
+      if (tick === 22) Engine.queueRecall(state, "projection provenance");
+      if (tick === 51) Engine.requestProjection(state);
+      Engine.step(state, {
+        stimulusMode: tick < 36 ? "periodic" : tick < 70 ? "pulse" : "basin",
+        stimulusAmplitude: 0.82,
+        selectedBasin: 4
+      });
+    }
+    syncControlsFromState();
+    rebuildField();
+    updateUi();
+    showToast("Loaded the deterministic 96-tick demonstration run.");
+  }
+
+  function updateTelemetry() {
+    const frame = latestFrame();
+    setMeter("coherenceValue", "coherenceBar", frame ? frame.coherenceScore : state.currentState.coherence, 1);
+    setMeter("inputValue", "inputBar", frame ? frame.input_strength : 0, 2);
+    setMeter("updateValue", "updateBar", frame ? frame.update_magnitude : 0, state.config.updateLimit);
+    setMeter("smoothingValue", "smoothingBar", frame ? frame.smoothing_confidence : 1, 1);
+    const sourceWeather = frame ? frame.weather : { id: "initial", label: "Unformed field", rationale: "No committed tick yet" };
+    const weather = presentWeather(sourceWeather);
+    setText("weatherLabel", weather.label);
+    setText("weatherRationale", weather.rationale);
+    setText("weatherAlias", `Weather alias: ${weather.alias}`);
+    setText("tickValue", state.context.step);
+    setText("phaseValue", state.context.phase);
+    setText("stateHash", shortHash(state.currentHash));
+    setText("projectionHash", shortHash(projection.matrixHash));
+    setText("fieldHash", shortHash(field.dataHash));
+    setText("projectionCount", `${state.counters.projection} basin projections`);
+    setText("memoryCount", `${state.counters.memoryWrites} memory records`);
+    setText("summaryCount", `${state.counters.summaries} history summaries`);
+    canvas.setAttribute("aria-label", `${weather.label}, weather alias ${weather.alias}. Tick ${state.context.step}. Coherence ${format(state.currentState.coherence, 2)}. ${state.events.length} recorded events. ${state.memories.length} memory records.${peerState ? ` Observer B coherence ${format(peerState.currentState.coherence, 2)}.` : ""}`);
+  }
+
+  function syncFeatureOptions() {
+    const select = byId("featureSelect");
+    const previous = select.value;
+    const ordered = Object.values(catalog);
+    if (select.options.length !== ordered.length) {
+      select.replaceChildren();
+      for (const record of ordered) {
+        const option = document.createElement("option");
+        option.value = record.feature_id;
+        option.textContent = FEATURE_LABELS[record.feature_id] || record.label;
+        select.append(option);
+      }
+    }
+    if (catalog[previous]) select.value = previous;
+    else select.value = renderer.scalarMode === "weather" ? "weather-composite" : scalarFeatureId(renderer.scalarMode);
+    renderProvenance();
+  }
+
+  function scalarFeatureId(mode) {
+    return mode === "potential" ? "attractor-potential"
+      : mode === "coherenceScore" ? "coherenceScore-field"
+        : mode === "memoryInfluence" ? "memory-influence"
+          : mode === "projectionReadiness" ? "projection-surface"
+            : mode === "separation" ? "currentState-smoothed"
+              : mode === "fronts" ? "update-vectors"
+                : "weather-composite";
+  }
+
+  function appendProvenanceRow(list, term, detail) {
+    const wrapper = document.createElement("div");
+    wrapper.className = "prov-row";
+    const dt = document.createElement("dt");
+    const dd = document.createElement("dd");
+    dt.textContent = term;
+    dd.textContent = Array.isArray(detail) ? detail.join(" to ") : String(detail == null ? " - " : detail);
+    wrapper.append(dt, dd);
+    list.append(wrapper);
+  }
+
+  function renderProvenance() {
+    const card = byId("provenanceCard");
+    const record = catalog[byId("featureSelect").value] || Object.values(catalog)[0];
+    card.replaceChildren();
+    const list = document.createElement("dl");
+    list.style.margin = "0";
+    appendProvenanceRow(list, "Evidence", record.evidence_class);
+    appendProvenanceRow(list, "Implementation component", record.implementation_refs.length ? record.implementation_refs : "None  -  implementation-local");
+    appendProvenanceRow(list, "Runtime source", record.runtime_paths);
+    appendProvenanceRow(list, "Transform", record.transform_chain);
+    appendProvenanceRow(list, "Projection", shortHash(record.projection_hash));
+    appendProvenanceRow(list, "Discarded", record.discarded_information);
+    appendProvenanceRow(list, "Permitted", record.permitted_interpretation);
+    appendProvenanceRow(list, "Forbidden", record.forbidden_extrapolation);
+    if (selectedEvent) appendProvenanceRow(list, "Selected event", M.stableStringify(selectedEvent, 5));
+    card.append(list);
+  }
+
+  function updateMemoryList() {
+    const list = byId("memoryList");
+    list.replaceChildren();
+    if (!state.memories.length) {
+      const empty = document.createElement("li");
+      empty.className = "empty-state";
+      empty.textContent = "No memory records yet. Trace history summaries remain a separate mechanism.";
+      list.append(empty);
+      return;
+    }
+    for (const memory of state.memories.slice().reverse()) {
+      const item = document.createElement("li");
+      const title = document.createElement("strong");
+      const weight = document.createElement("b");
+      const meta = document.createElement("small");
+      title.textContent = memory.label;
+      weight.textContent = `w ${memory.weight.toFixed(2)}`;
+      meta.textContent = `t${memory.createdStep}  /  ${memory.memoryId.split(":").pop()}  /  ${shortHash(memory.sourceStateHash)}`;
+      item.append(title, weight, meta);
+      list.append(item);
+    }
+  }
+
+  function eventTitle(event) {
+    if (event.kind === "projection") return `Basin projection  /  ${event.basinLabel}`;
+    if (event.kind === "memory-write") return `Memory record  /  ${event.label}`;
+    if (event.kind === "summary") return "History summary";
+    if (event.kind === "basin-transition") return `Attractor region  /  ${event.toBasinLabel}`;
+    return event.kind;
+  }
+
+  function eventMeta(event) {
+    if (event.kind === "projection") return `t${event.step}  /  Coherence ${format(event.coherenceScore, 2)}  /  ${shortHash(event.postHash)}`;
+    if (event.kind === "memory-write") return `t${event.step}  /  ${shortHash(event.sourceStateHash)}`;
+    if (event.kind === "summary") return `t${event.step}  /  ${shortHash(event.sourceHash)}`;
+    return `t${event.step}  /  direct event`;
+  }
+
+  function updateTimeline() {
+    const timeline = byId("timeline");
+    timeline.replaceChildren();
+    if (!state.events.length) {
+      const empty = document.createElement("p");
+      empty.className = "empty-state";
+      empty.textContent = "Run the engine or inscribe a memory to create auditable events.";
+      timeline.append(empty);
+      return;
+    }
+    for (const event of state.events.slice(-48)) {
+      const card = document.createElement("button");
+      card.type = "button";
+      card.className = `event-card ${event.kind}`;
+      const title = document.createElement("strong");
+      const meta = document.createElement("small");
+      title.textContent = eventTitle(event);
+      meta.textContent = eventMeta(event);
+      card.append(title, meta);
+      card.addEventListener("click", () => {
+        selectedEvent = event;
+        byId("featureSelect").value = "event-markers";
+        renderProvenance();
+      });
+      timeline.append(card);
+    }
+    timeline.scrollLeft = timeline.scrollWidth;
+  }
+
+  function updateUi() {
+    updateTelemetry();
+    updateMemoryList();
+    updateTimeline();
+    renderProvenance();
+  }
+
+  function updateSelection(point) {
+    renderer.selected = point;
+    const sample = Field.sampleAt(field, point.x, point.y);
+    const latent = Projection.viewportToLatent(projection, point.x, point.y, state.config.radialLimit);
+    currentForcing = { latent, label: `viewport(${point.x.toFixed(2)},${point.y.toFixed(2)})` };
+    const readout = byId("selectionReadout");
+    readout.hidden = false;
+    readout.textContent = `forcing target (${point.x.toFixed(2)}, ${point.y.toFixed(2)})  /  coherence ${sample.coherence.toFixed(3)}  /  projection margin ${sample.projectionMargin.toFixed(3)}  /  next tick`;
+    dirty = true;
+  }
+
+  function projectionPayload() {
+    return {
+      ...Projection.projectionRecord(projection, state.currentState.latent),
+      seed: projection.seed,
+      matrix3: projection.matrix3,
+      anchor: projection.anchor
+    };
+  }
+
+  function downloadFile(name, mime, content) {
+    const blob = new Blob([content], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = name;
+    document.body.append(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  function exportReplay() {
+    const replay = Engine.serialize(state, {
+      projection: projectionPayload(),
+      field: { spec: field.spec, gridSpecHash: field.gridSpecHash, dataHash: field.dataHash },
+      provenance: Object.values(catalog),
+      viewport: { view: renderer.view, scalarMode: renderer.scalarMode, layers: renderer.layers },
+      ensemble: peerState ? {
+        peerState: Engine.serialize(peerState).state,
+        couplingStrength: Number(byId("couplingRange").value),
+        policy: "frozen snapshot; symmetric double-buffered input"
+      } : null
+    });
+    downloadFile(`memory-weather-${state.runId}-t${state.context.step}.json`, "application/json", `${JSON.stringify(replay, null, 2)}\n`);
+    showToast("Replay JSON exported.");
+  }
+
+  function csvEscape(value) {
+    const text = value == null ? "" : String(value);
+    return /[",\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
+  }
+
+  function exportCsv() {
+    const columns = ["run_id", "observer_id", "step", "phase", "coherenceScore", "input_strength", "update_magnitude", "smoothing_confidence", "entropy", "drift", "stable", "projection_triggered", "state_hash", "tags"];
+    const lines = [columns.join(",")];
+    for (const frame of state.frames) {
+      lines.push(columns.map((column) => csvEscape(column === "tags" ? frame.tags.join("|") : frame[column])).join(","));
+    }
+    downloadFile(`memory-weather-${state.runId}-telemetry.csv`, "text/csv", `${lines.join("\n")}\n`);
+    showToast("Telemetry CSV exported.");
+  }
+
+  async function importReplay(file) {
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) throw new RangeError("Replay exceeds the 10 MiB local import limit.");
+    const text = await file.text();
+    const replay = JSON.parse(text);
+    const nextState = Engine.hydrate(replay);
+    let nextProjection = Projection.createProjection();
+    if (replay.projection) {
+      nextProjection = Projection.createProjection({
+        seed: replay.projection.seed,
+        matrix3: replay.projection.matrix3,
+        anchor: replay.projection.anchor
+      });
+      if (replay.projection.matrix_hash && replay.projection.matrix_hash !== nextProjection.matrixHash) {
+        throw new Error("projection hash mismatch");
+      }
+    }
+    setRunning(false);
+    state = nextState;
+    peerState = replay.ensemble && replay.ensemble.peerState
+      ? Engine.hydrate({ schemaVersion: Engine.SCHEMA_VERSION, state: replay.ensemble.peerState })
+      : null;
+    projection = nextProjection;
+    byId("seedInput").value = String(state.config.seed);
+    syncControlsFromState();
+    currentForcing = state.context.forcingVector ? { latent: [...state.context.forcingVector], label: state.context.forcingLabel || "imported" } : null;
+    byId("peerToggle").checked = Boolean(peerState);
+    if (replay.ensemble && Number.isFinite(replay.ensemble.couplingStrength)) {
+      byId("couplingRange").value = String(replay.ensemble.couplingStrength);
+      setText("couplingOutput", Number(replay.ensemble.couplingStrength).toFixed(2));
+    }
+    rebuildField();
+    updateUi();
+    showToast(`Imported ${state.runId} at tick ${state.context.step}.`);
+  }
+
+  function syncControlsFromState() {
+    byId("stimulusSelect").value = state.context.stimulusMode;
+    byId("amplitudeRange").value = String(state.context.stimulusAmplitude);
+    setText("amplitudeOutput", Number(state.context.stimulusAmplitude).toFixed(2));
+    byId("basinSelect").value = String(state.context.selectedBasin);
+    document.querySelectorAll("[data-ablation]").forEach((input) => {
+      input.checked = state.config.mechanisms[input.dataset.ablation];
+    });
+  }
+
+  function bindControls() {
+    byId("runBtn").addEventListener("click", () => setRunning(!running));
+    byId("stepBtn").addEventListener("click", executeStep);
+    byId("resetBtn").addEventListener("click", resetEngine);
+    byId("speedSelect").addEventListener("change", scheduleRun);
+    byId("scalarSelect").addEventListener("change", (event) => {
+      Renderer.setScalarMode(renderer, event.target.value);
+      byId("featureSelect").value = scalarFeatureId(event.target.value);
+      renderProvenance();
+      dirty = true;
+    });
+    document.querySelectorAll("[data-view]").forEach((button) => {
+      button.addEventListener("click", () => {
+        document.querySelectorAll("[data-view]").forEach((item) => {
+          const active = item === button;
+          item.classList.toggle("active", active);
+          item.setAttribute("aria-pressed", String(active));
+        });
+        Renderer.setView(renderer, button.dataset.view);
+        setText("projectionMode", button.dataset.view === "terrain" ? "fixed 3x12 projection" : "fixed 2x12 projection");
+        dirty = true;
+      });
+    });
+    byId("layerControls").addEventListener("change", (event) => {
+      if (event.target.matches("[data-layer]")) {
+        Renderer.setLayer(renderer, event.target.dataset.layer, event.target.checked);
+        dirty = true;
+      }
+    });
+    byId("ablationControls").addEventListener("change", (event) => {
+      if (event.target.matches("[data-ablation]")) {
+        Engine.setMechanism(state, event.target.dataset.ablation, event.target.checked);
+        rebuildField();
+        updateUi();
+      }
+    });
+    byId("amplitudeRange").addEventListener("input", (event) => {
+      setText("amplitudeOutput", Number(event.target.value).toFixed(2));
+    });
+    byId("stimulusSelect").addEventListener("change", () => {
+      currentForcing = null;
+      renderer.selected = null;
+      byId("selectionReadout").hidden = true;
+      showToast("Preset selected; explicit viewport forcing cleared.");
+    });
+    byId("weightRange").addEventListener("input", (event) => {
+      setText("weightOutput", Number(event.target.value).toFixed(2));
+    });
+    byId("couplingRange").addEventListener("input", (event) => {
+      setText("couplingOutput", Number(event.target.value).toFixed(2));
+    });
+    byId("peerToggle").addEventListener("change", (event) => {
+      if (event.target.checked) {
+        const peerSeed = (state.config.seed + 1) >>> 0;
+        peerState = Engine.createState({ config: configFromControls(peerSeed), observerId: "observer-b" });
+        for (let i = 0; i < state.context.step; i += 1) Engine.step(peerState, observationFromControls());
+        byId("featureSelect").value = "multi-observer-coupling";
+        showToast("Observer B enabled with an independent seed and frozen-snapshot coupling.");
+      } else {
+        peerState = null;
+        showToast("Instance B disabled; instance A state is unchanged.");
+      }
+      rebuildField();
+      updateUi();
+    });
+    byId("inscribeBtn").addEventListener("click", () => {
+      try {
+        const result = Engine.inscribeMemory(state, byId("memoryInput").value, Number(byId("weightRange").value));
+        if (!result.memory) return showToast("Memory writing is currently ablated.");
+        rebuildField();
+        updateUi();
+        showToast(`Recorded "${result.memory.label}" as a local memory artifact.`);
+      } catch (error) {
+        showToast(error.message);
+      }
+    });
+    byId("recallBtn").addEventListener("click", () => {
+      const packet = Engine.queueRecall(state, byId("memoryInput").value);
+      rebuildField();
+      updateUi();
+      showToast(packet ? `Memory replay queued "${packet.label}" at similarity ${packet.similarity.toFixed(3)}.` : "No eligible memory replay Memory influence packet.");
+    });
+    byId("projectionBtn").addEventListener("click", () => {
+      Engine.requestProjection(state);
+      showToast("Basin projection requested. The next state-transition tick Step will assess and, if eligible, register it.");
+    });
+    byId("featureSelect").addEventListener("change", () => {
+      selectedEvent = null;
+      renderProvenance();
+    });
+    byId("exportBtn").addEventListener("click", exportReplay);
+    byId("csvBtn").addEventListener("click", exportCsv);
+    byId("demoBtn").addEventListener("click", loadDemo);
+    byId("importBtn").addEventListener("click", () => byId("importFile").click());
+    byId("importFile").addEventListener("change", async (event) => {
+      try {
+        await importReplay(event.target.files[0]);
+      } catch (error) {
+        showToast(`Import rejected: ${error.message}`);
+      } finally {
+        event.target.value = "";
+      }
+    });
+
+    canvas.addEventListener("pointerdown", (event) => {
+      pointerState = { x: event.clientX, y: event.clientY, yaw: renderer.yaw, pitch: renderer.pitch, moved: false };
+      canvas.setPointerCapture(event.pointerId);
+    });
+    canvas.addEventListener("pointermove", (event) => {
+      if (!pointerState || renderer.view !== "terrain") return;
+      const dx = event.clientX - pointerState.x;
+      const dy = event.clientY - pointerState.y;
+      if (Math.abs(dx) + Math.abs(dy) > 3) pointerState.moved = true;
+      renderer.yaw = pointerState.yaw + dx * 0.009;
+      renderer.pitch = M.clamp(pointerState.pitch + dy * 0.006, 0.35, 1.28);
+      dirty = true;
+    });
+    canvas.addEventListener("pointerup", (event) => {
+      if (pointerState && !pointerState.moved && renderer.view !== "terrain") {
+        updateSelection(Renderer.screenToField(renderer, field, event.clientX, event.clientY));
+      }
+      pointerState = null;
+      if (canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
+    });
+    canvas.addEventListener("pointercancel", () => { pointerState = null; });
+    canvas.addEventListener("wheel", (event) => {
+      if (renderer.view !== "terrain") return;
+      event.preventDefault();
+      renderer.pitch = M.clamp(renderer.pitch + Math.sign(event.deltaY) * 0.05, 0.35, 1.28);
+      dirty = true;
+    }, { passive: false });
+
+    window.addEventListener("keydown", (event) => {
+      const tag = document.activeElement && document.activeElement.tagName;
+      if (["INPUT", "SELECT", "TEXTAREA", "BUTTON"].includes(tag)) return;
+      if (event.code === "Space") { event.preventDefault(); setRunning(!running); }
+      else if (event.key === ".") executeStep();
+      else if (event.key.toLowerCase() === "r") resetEngine();
+      else if (["1", "2", "3"].includes(event.key)) document.querySelector(`[data-view="${event.key === "1" ? "weather" : event.key === "2" ? "field" : "terrain"}"]`).click();
+    });
+
+    if (typeof ResizeObserver !== "undefined") {
+      new ResizeObserver(() => { rebuildField(); }).observe(byId("viewport"));
+    } else window.addEventListener("resize", rebuildField);
+  }
+
+  function animationLoop(now) {
+    if (dirty) {
+      Renderer.render(renderer, field, state, projection, peerState);
+      dirty = false;
+      renderedFrames += 1;
+    }
+    if (now - lastFrameAt >= 1000) {
+      measuredFps = Math.round((renderedFrames * 1000) / (now - lastFrameAt));
+      setText("frameRate", `${measuredFps} fps`);
+      renderedFrames = 0;
+      lastFrameAt = now;
+    }
+    requestAnimationFrame(animationLoop);
+  }
+
+  bindControls();
+  syncFeatureOptions();
+  updateUi();
+  requestAnimationFrame(animationLoop);
+})();
+
+</script>
+</body>
+</html>
