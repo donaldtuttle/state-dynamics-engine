@@ -4,6 +4,9 @@
 
 - Document the demo, the 12-number state, a matched noise comparison, the
   session trace, and a proposed baseline that has not been run.
+- Tighten that unrun baseline: validation ceiling, shorter-horizon fallback,
+  integrator-rate edge rule, shared readout-penalty grid, and three verdict
+  tiers. A primary result would still say nothing about memory or projection.
 - Add a screenshot of the deployed State Dynamics Lab.
 
 ## 0.1.0 - 2026-10-03

@@ -52,7 +52,10 @@ not a measure of intelligence or awareness.
 What you can investigate today is how this trajectory changes when you alter
 the seed, the input mode, or one mechanism, and whether an export replays.
 What you cannot conclude from the included tests is that the model is useful
-on an external task. That comparison has not been run. A proposal is in
+on an external task. That comparison has not been run. Its pass/fail, if it
+is ever run, covers only the core smoothing update against a leaky
+integrator, with memory, projection, and noise off. It would not be evidence
+about those three mechanisms. See
 [docs/BASELINE_PROPOSAL.md](docs/BASELINE_PROPOSAL.md).
 
 ## Start here
