@@ -3,10 +3,13 @@
 ## Unreleased
 
 - Document the demo, the 12-number state, a matched noise comparison, the
-  session trace, and a proposed baseline that has not been run.
+  session trace, and the baseline protocol.
 - Tighten that unrun baseline: validation ceiling, shorter-horizon fallback,
   integrator-rate edge rule, shared readout-penalty grid, and three verdict
   tiers. A primary result would still say nothing about memory or projection.
+- Run that protocol once. The integrator's validation accuracy was 40/40 at
+  64, 32, and 16 ticks, so the test seeds were not scored. There is no
+  benefit verdict.
 - Add a screenshot of the deployed State Dynamics Lab.
 
 ## 0.1.0 - 2026-10-03
