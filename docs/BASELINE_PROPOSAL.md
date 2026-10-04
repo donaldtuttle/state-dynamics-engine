@@ -1,14 +1,21 @@
 # Baseline comparison
 
-Status: RUN once on 2026-10-04. See [docs/BASELINE_RESULT.md](BASELINE_RESULT.md).
-The rules below were declared first and were not changed after the scores.
-The validation ceiling was hit at 64, 32, and 16 ticks, so the test seeds
-were not scored. There is no benefit verdict.
+Status: CLOSED. The ceiling rule triggered. See [docs/BASELINE_RESULT.md](BASELINE_RESULT.md).
 
-The run is recorded in [docs/BASELINE_RESULT.md](BASELINE_RESULT.md). Matching the historical
-implementation is migration evidence. It is not evidence that this engine is
-useful, novel, or better than a simpler model. The baseline run did not
-produce a benefit verdict.
+The rules below were declared first and were not changed after the pilot.
+Test seeds 1040-1059 were never scored. There is no benefit verdict.
+
+Pilot, validation seeds 1030-1039 only:
+
+- Integrator accuracy was 40/40 at 64, 32, and 16 ticks.
+- Engine accuracy was 11/40. Chance for four classes is 10/40.
+- At 64 ticks the seed's share of the engine's final-state sum of squares was 0.997. The mean cosine with the starting state was 0.999.
+
+Within-seed check, same validation seeds, not a verdict. After each seed's mean across the four generators is removed, SS_class / SS_residual is 8.08 at 64 ticks, 7.35 at 32, and 5.42 at 16. The class contrast is present in that paired residual. It is small: the mean distance between two modes of the same seed is 0.056 at 64 ticks. Removing the recorded start instead, and fitting a leave-one-seed-out linear readout, scored between 10/40 and 15/40. State minus start does not by itself name the generator.
+
+Say that a predeclared ceiling rule caught an uninformative task before any test seeds were scored. Do not say that the engine fails or underperforms.
+
+Matching the historical implementation is migration evidence. It is not evidence that this engine is useful, novel, or better than a simpler model.
 
 ## What a primary result would mean
 
