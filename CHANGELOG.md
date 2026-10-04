@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Document the demo, the 12-number state, a matched noise comparison, the
+  session trace, and a proposed baseline that has not been run.
+- Add a screenshot of the deployed State Dynamics Lab.
+
 ## 0.1.0 - 2026-10-03
 
 - Independent State Dynamics Engine identity and State Dynamics Lab interface.
