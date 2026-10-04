@@ -13,6 +13,7 @@
 - Close that protocol. Record the validation-only finding that, with
   mechanisms off, the default update leaves the state near its start, while
   a within-seed class contrast remains.
+- Add the validation-only scripts for that check. They do not score test seeds.
 - Add a screenshot of the deployed State Dynamics Lab.
 
 ## 0.1.0 - 2026-10-03
