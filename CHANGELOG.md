@@ -10,6 +10,9 @@
 - Run that protocol once. The integrator's validation accuracy was 40/40 at
   64, 32, and 16 ticks, so the test seeds were not scored. There is no
   benefit verdict.
+- Close that protocol. Record the validation-only finding that, with
+  mechanisms off, the default update leaves the state near its start, while
+  a within-seed class contrast remains.
 - Add a screenshot of the deployed State Dynamics Lab.
 
 ## 0.1.0 - 2026-10-03

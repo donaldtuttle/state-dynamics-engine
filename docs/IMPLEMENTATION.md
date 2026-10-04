@@ -77,3 +77,11 @@ This is an inspectable experimental dynamical system. The tested migration
 preserves its numerical behavior. Advantages over a simpler simulator or on an
 external task remain unmeasured. New mechanisms should be evaluated against
 matched controls, with seeds, inputs, metrics, and thresholds chosen in advance.
+
+## Limitations
+
+With the default smoothing rate of 0.1 and the default update scale of 0.32, and with projection, memory, summaries, and noise off, 64 ticks of input barely change the direction of the state.
+
+On validation seeds 1030-1039, the mean cosine between the final state and the starting state was 0.999 after 64 ticks. The mean distance from the start was 0.323, from a mean start norm of 1.082. The mean final norm was 0.762. The Lab's own default is mechanisms on. This measurement is the core update with those mechanisms off. A session in that configuration drifts slowly. It is not a task score.
+
+The generator is not absent from the paired runs. After each seed's mean across the four generators is removed, the class sum of squares is 8.08 times the residual sum of squares at 64 ticks. The mean distance between two modes of the same seed is only 0.056, against a within-class spread of about 0.72. The contrast is real and much smaller than the starting-state offset. Test seeds 1040-1059 were not used.

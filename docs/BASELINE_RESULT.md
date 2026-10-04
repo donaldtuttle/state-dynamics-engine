@@ -83,3 +83,13 @@ The engine's validation accuracy stayed at 11/40, or 10/40 at the other penaltie
 The original five-rate choice of `a` flipped when its winning rate was removed, at every horizon. Those choices were not replaced. Memory and projection were not run. This result says nothing about them.
 
 No second run was used to replace these numbers.
+
+## Within-seed check
+
+Validation seeds only. Not a verdict, and not a change to the rules above.
+
+After each seed's mean across the four generators is removed, SS_class / SS_residual is 8.08 at 64 ticks, 7.35 at 32, and 5.42 at 16. The class contrast is present in that paired residual. The mean distance between two modes of the same seed is 0.056 at 64 ticks. The mean cosine with the starting state is 0.999, and the seed's share of the final-state sum of squares is 0.997.
+
+A leave-one-seed-out linear readout on state minus start scored between 10/40 and 15/40 at 64 ticks. Subtracting the recorded start does not by itself name the generator. Centering a seed by the mean of all four of its finals does, because that mean uses the paired runs. A single trajectory does not provide it.
+
+This separates two readings. The raw 11/40 pilot does not show that the update erased the generator. It also does not show that state minus start is a solved feature. Test seeds were not used.

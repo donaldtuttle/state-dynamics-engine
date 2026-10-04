@@ -55,9 +55,10 @@ What you cannot conclude from the included tests is that the model is useful
 on an external task. The predeclared comparison was run once. At every
 allowed horizon the leaky integrator's validation accuracy was 40/40, so the
 task was uninformative and the test seeds were not scored. There is no
-benefit verdict. That run covered only the core smoothing update, with
-memory, projection, and noise off. It is not evidence about those
-mechanisms. See [docs/BASELINE_RESULT.md](docs/BASELINE_RESULT.md).
+benefit verdict. A predeclared ceiling rule caught that before any test seed
+was scored. The run covered only the core smoothing update, with memory,
+projection, and noise off. It is not evidence about those mechanisms. The
+closure is in [docs/BASELINE_PROPOSAL.md](docs/BASELINE_PROPOSAL.md).
 
 ## Start here
 
