@@ -1,10 +1,14 @@
 # Baseline comparison
 
-Status: PROPOSED / NOT RUN.
+Status: RUN once on 2026-10-04. See [docs/BASELINE_RESULT.md](BASELINE_RESULT.md).
+The rules below were declared first and were not changed after the scores.
+The validation ceiling was hit at 64, 32, and 16 ticks, so the test seeds
+were not scored. There is no benefit verdict.
 
-No task evaluation is in this repository. Matching the historical
+The run is recorded in [docs/BASELINE_RESULT.md](BASELINE_RESULT.md). Matching the historical
 implementation is migration evidence. It is not evidence that this engine is
-useful, novel, or better than a simpler model.
+useful, novel, or better than a simpler model. The baseline run did not
+produce a benefit verdict.
 
 ## What a primary result would mean
 

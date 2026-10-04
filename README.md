@@ -52,11 +52,12 @@ not a measure of intelligence or awareness.
 What you can investigate today is how this trajectory changes when you alter
 the seed, the input mode, or one mechanism, and whether an export replays.
 What you cannot conclude from the included tests is that the model is useful
-on an external task. That comparison has not been run. Its pass/fail, if it
-is ever run, covers only the core smoothing update against a leaky
-integrator, with memory, projection, and noise off. It would not be evidence
-about those three mechanisms. See
-[docs/BASELINE_PROPOSAL.md](docs/BASELINE_PROPOSAL.md).
+on an external task. The predeclared comparison was run once. At every
+allowed horizon the leaky integrator's validation accuracy was 40/40, so the
+task was uninformative and the test seeds were not scored. There is no
+benefit verdict. That run covered only the core smoothing update, with
+memory, projection, and noise off. It is not evidence about those
+mechanisms. See [docs/BASELINE_RESULT.md](docs/BASELINE_RESULT.md).
 
 ## Start here
 
@@ -148,8 +149,9 @@ The update is a bounded nonlinear recurrence with a smoother, optional noise,
 optional recalled history, and an optional blend toward fixed vectors. That
 is similar in parts to a leaky integrator, and only loosely similar to an
 attractor network. It is not an echo-state network and not a Hopfield network.
-The distinctions and a not-yet-run comparison are in
-[docs/BASELINE_PROPOSAL.md](docs/BASELINE_PROPOSAL.md).
+The distinctions, the predeclared protocol, and the one run are in
+[docs/BASELINE_PROPOSAL.md](docs/BASELINE_PROPOSAL.md) and
+[docs/BASELINE_RESULT.md](docs/BASELINE_RESULT.md).
 
 ## Verify and build
 
