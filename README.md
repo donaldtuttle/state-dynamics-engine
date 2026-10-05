@@ -60,6 +60,15 @@ was scored. The run covered only the core smoothing update, with memory,
 projection, and noise off. It is not evidence about those mechanisms. The
 closure is in [docs/BASELINE_PROPOSAL.md](docs/BASELINE_PROPOSAL.md).
 
+A separate experiment asked whether a correction learned only from
+training trajectories makes a delayed agreement relation readable from
+one new trajectory. It was registered and scored once. The corrected
+engine did not clear chance, and the 95 percent interval ruled out an
+advantage larger than +0.05 over the corrected integrator. There is no
+benefit verdict. Seeds 1040-1059 were not used. The record is in
+[docs/SINGLE_TRAJECTORY_1_RESULT.md](docs/SINGLE_TRAJECTORY_1_RESULT.md).
+It does not reopen the closed baseline.
+
 ## Start here
 
 | Piece | What it is |

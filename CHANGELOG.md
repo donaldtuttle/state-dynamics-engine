@@ -14,6 +14,10 @@
   mechanisms off, the default update leaves the state near its start, while
   a within-seed class contrast remains.
 - Add the validation-only scripts for that check. They do not score test seeds.
+- Register and run SINGLE-TRAJECTORY-1 on a delayed agreement relation.
+  The learned start correction did not clear chance, and the test interval
+  ruled out an advantage above +0.05. No benefit verdict. Seeds 1040-1059
+  were not used. The closed baseline was not changed.
 - Add a screenshot of the deployed State Dynamics Lab.
 
 ## 0.1.0 - 2026-10-03

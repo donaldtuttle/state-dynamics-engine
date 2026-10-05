@@ -1,0 +1,601 @@
+{
+  "experiment": "SINGLE-TRAJECTORY-1",
+  "engine_reference": "917c3e9df6a313474b22b28ff6574435313fc808",
+  "lock_status": "LOCKED_FOR_TEST",
+  "selected_engine_lambda": 0.0001,
+  "selected_integrator_a": "1.0",
+  "selected_integrator_lambda": 100,
+  "blocks": [
+    {
+      "seed": 2048,
+      "engine": 0.5,
+      "integrator": 0.5,
+      "difference": 0,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2049,
+      "engine": 0.25,
+      "integrator": 0.5,
+      "difference": -0.25,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2050,
+      "engine": 0.5,
+      "integrator": 0.5,
+      "difference": 0,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2051,
+      "engine": 0.5,
+      "integrator": 0.5,
+      "difference": 0,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2052,
+      "engine": 0.5,
+      "integrator": 0.5,
+      "difference": 0,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2053,
+      "engine": 0.5,
+      "integrator": 0.5,
+      "difference": 0,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2054,
+      "engine": 0.5,
+      "integrator": 0.5,
+      "difference": 0,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2055,
+      "engine": 0.5,
+      "integrator": 0.5,
+      "difference": 0,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2056,
+      "engine": 0.5,
+      "integrator": 0.5,
+      "difference": 0,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2057,
+      "engine": 0.5,
+      "integrator": 0.5,
+      "difference": 0,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2058,
+      "engine": 0.5,
+      "integrator": 0.5,
+      "difference": 0,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2059,
+      "engine": 0.5,
+      "integrator": 0.5,
+      "difference": 0,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2060,
+      "engine": 0.5,
+      "integrator": 0.5,
+      "difference": 0,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2061,
+      "engine": 0.5,
+      "integrator": 0.5,
+      "difference": 0,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2062,
+      "engine": 0.5,
+      "integrator": 0.5,
+      "difference": 0,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2063,
+      "engine": 0.5,
+      "integrator": 0.5,
+      "difference": 0,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2064,
+      "engine": 0.5,
+      "integrator": 0.5,
+      "difference": 0,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2065,
+      "engine": 0.75,
+      "integrator": 0.5,
+      "difference": 0.25,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2066,
+      "engine": 0.5,
+      "integrator": 0.5,
+      "difference": 0,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2067,
+      "engine": 0.5,
+      "integrator": 0.5,
+      "difference": 0,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2068,
+      "engine": 0.5,
+      "integrator": 0.5,
+      "difference": 0,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2069,
+      "engine": 0.25,
+      "integrator": 0.5,
+      "difference": -0.25,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2070,
+      "engine": 0.5,
+      "integrator": 0.5,
+      "difference": 0,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2071,
+      "engine": 0.5,
+      "integrator": 0.5,
+      "difference": 0,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2072,
+      "engine": 0.25,
+      "integrator": 0.5,
+      "difference": -0.25,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2073,
+      "engine": 0.5,
+      "integrator": 0.5,
+      "difference": 0,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2074,
+      "engine": 0.5,
+      "integrator": 0.5,
+      "difference": 0,
+      "raw": 0.25,
+      "delta": 0.5
+    },
+    {
+      "seed": 2075,
+      "engine": 0.25,
+      "integrator": 0.5,
+      "difference": -0.25,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2076,
+      "engine": 0.5,
+      "integrator": 0.5,
+      "difference": 0,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2077,
+      "engine": 0.5,
+      "integrator": 0.5,
+      "difference": 0,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2078,
+      "engine": 0.5,
+      "integrator": 0.5,
+      "difference": 0,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2079,
+      "engine": 0.5,
+      "integrator": 0.5,
+      "difference": 0,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2080,
+      "engine": 0.5,
+      "integrator": 0.5,
+      "difference": 0,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2081,
+      "engine": 0.75,
+      "integrator": 0.5,
+      "difference": 0.25,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2082,
+      "engine": 0.5,
+      "integrator": 0.5,
+      "difference": 0,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2083,
+      "engine": 0.5,
+      "integrator": 0.5,
+      "difference": 0,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2084,
+      "engine": 0.5,
+      "integrator": 0.5,
+      "difference": 0,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2085,
+      "engine": 0.25,
+      "integrator": 0.5,
+      "difference": -0.25,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2086,
+      "engine": 0.25,
+      "integrator": 0.5,
+      "difference": -0.25,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2087,
+      "engine": 0.5,
+      "integrator": 0.5,
+      "difference": 0,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2088,
+      "engine": 0.25,
+      "integrator": 0.5,
+      "difference": -0.25,
+      "raw": 0.75,
+      "delta": 0.5
+    },
+    {
+      "seed": 2089,
+      "engine": 0.5,
+      "integrator": 0.5,
+      "difference": 0,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2090,
+      "engine": 0.75,
+      "integrator": 0.5,
+      "difference": 0.25,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2091,
+      "engine": 0.75,
+      "integrator": 0.5,
+      "difference": 0.25,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2092,
+      "engine": 0.5,
+      "integrator": 0.5,
+      "difference": 0,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2093,
+      "engine": 0.5,
+      "integrator": 0.5,
+      "difference": 0,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2094,
+      "engine": 0.5,
+      "integrator": 0.5,
+      "difference": 0,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2095,
+      "engine": 0.5,
+      "integrator": 0.5,
+      "difference": 0,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2096,
+      "engine": 0.5,
+      "integrator": 0.5,
+      "difference": 0,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2097,
+      "engine": 0.5,
+      "integrator": 0.5,
+      "difference": 0,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2098,
+      "engine": 0.5,
+      "integrator": 0.5,
+      "difference": 0,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2099,
+      "engine": 0.5,
+      "integrator": 0.5,
+      "difference": 0,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2100,
+      "engine": 0.25,
+      "integrator": 0.5,
+      "difference": -0.25,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2101,
+      "engine": 0.5,
+      "integrator": 0.5,
+      "difference": 0,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2102,
+      "engine": 0.5,
+      "integrator": 0.5,
+      "difference": 0,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2103,
+      "engine": 0.5,
+      "integrator": 0.5,
+      "difference": 0,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2104,
+      "engine": 0.5,
+      "integrator": 0.5,
+      "difference": 0,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2105,
+      "engine": 0.5,
+      "integrator": 0.5,
+      "difference": 0,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2106,
+      "engine": 0.5,
+      "integrator": 0.5,
+      "difference": 0,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2107,
+      "engine": 0.5,
+      "integrator": 0.5,
+      "difference": 0,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2108,
+      "engine": 0.5,
+      "integrator": 0.5,
+      "difference": 0,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2109,
+      "engine": 0.25,
+      "integrator": 0.5,
+      "difference": -0.25,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2110,
+      "engine": 0.5,
+      "integrator": 0.5,
+      "difference": 0,
+      "raw": 0.5,
+      "delta": 0.5
+    },
+    {
+      "seed": 2111,
+      "engine": 0.5,
+      "integrator": 0.5,
+      "difference": 0,
+      "raw": 0.5,
+      "delta": 0.5
+    }
+  ],
+  "summaries": {
+    "engine": {
+      "correct": 123,
+      "total": 256,
+      "accuracy": 0.48046875,
+      "nll": 0.6931473836088589
+    },
+    "integrator": {
+      "correct": 128,
+      "total": 256,
+      "accuracy": 0.5,
+      "nll": 0.6931471805599453
+    },
+    "raw": {
+      "correct": 128,
+      "total": 256,
+      "accuracy": 0.5,
+      "nll": 0.6931471804394335
+    },
+    "delta": {
+      "correct": 128,
+      "total": 256,
+      "accuracy": 0.5,
+      "nll": 0.693147180184413
+    },
+    "initial": {
+      "correct": 128,
+      "total": 256,
+      "accuracy": 0.5,
+      "nll": 0.6931471805599453
+    },
+    "final_input": {
+      "correct": 128,
+      "total": 256,
+      "accuracy": 0.5,
+      "nll": 0.6931471805599453
+    }
+  },
+  "intervals": {
+    "difference": {
+      "low": -0.046875,
+      "high": 0.0078125,
+      "width": 0.0546875
+    },
+    "engine": {
+      "low": 0.453125,
+      "high": 0.5078125,
+      "width": 0.0546875
+    },
+    "integrator": {
+      "low": 0.5,
+      "high": 0.5,
+      "width": 0
+    },
+    "raw": {
+      "low": 0.48828125,
+      "high": 0.51171875,
+      "width": 0.0234375
+    },
+    "delta": {
+      "low": 0.5,
+      "high": 0.5,
+      "width": 0
+    }
+  },
+  "cue_rule_perfect": true,
+  "leakage_exact_half": true,
+  "bootstrap": {
+    "draws": 50000,
+    "seed": 20261005,
+    "method": "linear",
+    "generator": "PCG64"
+  },
+  "verdict": {
+    "code": "NO_BENEFIT",
+    "benefit": false,
+    "tier": "ADVANTAGE_RULED_OUT"
+  },
+  "mean_difference": -0.01953125
+}
