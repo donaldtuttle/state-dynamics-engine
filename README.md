@@ -1,8 +1,32 @@
 # State Dynamics Engine
 
-A deterministic simulator for a bounded 12-number state. You can step one
-update, turn a mechanism off, and export a trace that replays to the same
-numbers.
+## What is this?
+
+A small simulation playground built around 12 numbers that change over time.
+It can recall stored history summaries and, when its rules allow, move toward
+one of six fixed targets called basins. The interactive lab shows the state,
+events, and a diagnostic hash as the simulation runs.
+
+## Why care?
+
+Suppose you want to know whether adding noise changes how a system settles.
+Here you can run the same starting seed and input with noise on and off,
+then compare the twelve numbers and their paths through time. You can also
+switch off memory or basin projection to investigate their effects.
+
+That makes this a hands-on tool for learning about state dynamics and testing
+mechanism ideas. Recorded runs can be exported and replayed, so an unexpected
+result can be inspected again. A changed trajectory shows that a mechanism
+has an effect; whether that effect is useful requires a separate task test.
+
+## Try this
+
+Open the lab, keep seed `0x51e1d`, choose **basin**, and press **+1** sixteen
+times. Note the state readouts and hash. Reset, turn **Adaptive noise** off,
+and repeat the sixteen steps. What changed?
+
+The [quick experiment below](#quick-experiment) includes the recorded outputs
+and a command-line version.
 
 **Try the demo:** [State Dynamics Lab](https://donaldtuttle.github.io/state-dynamics-engine/simulator/)
 
