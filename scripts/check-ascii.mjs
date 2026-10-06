@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 const root = fileURLToPath(new URL('../', import.meta.url));
-const skip = new Set(['.git', 'node_modules', '_site', 'dist']);
+const skip = new Set(['.git', 'node_modules', '_site', 'dist', '__pycache__']);
 const imageExt = new Set(['.png', '.jpg', '.jpeg', '.gif', '.webp', '.ico']);
 let count = 0;
 function walk(dir) {

@@ -1,0 +1,16 @@
+name: Single trajectory design checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  design:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: '24.19.0'
+      - run: python3 -m pip install -r experiments/single-trajectory-1/requirements.txt
+      - run: python3 experiments/single-trajectory-1/run.py design-check
+      - run: node --experimental-strip-types --test experiments/single-trajectory-1/adapter.test.mjs
+      - run: python3 -m unittest discover -s experiments/single-trajectory-1 -p 'test_*.py'
