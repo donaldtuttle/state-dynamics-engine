@@ -182,7 +182,10 @@ The distinctions, the predeclared protocol, and the one run are in
 
 The separate [SINGLE-TRAJECTORY-1 proposal](experiments/single-trajectory-1/README.md)
 includes a design review, development tests and enforced registration/test locks.
-It remains DESIGN: no study trajectories or task results have been generated.
+Its [first completed run](experiments/single-trajectory-1/records/20261006/README.md)
+did not demonstrate the predeclared advantage: corrected engine 48.05%,
+integrator 50%, with a paired difference interval of -4.69 to +0.78 percentage
+points. The frozen proposal remains preserved alongside both run locks.
 
 ```bash
 npm run verify
