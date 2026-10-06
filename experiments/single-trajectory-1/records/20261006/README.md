@@ -1,8 +1,40 @@
-# SINGLE-TRAJECTORY-1 validation record
+# SINGLE-TRAJECTORY-1 completed run
 
-Validation completed on 2026-10-06. Status: PASS through the validation gate.
-Test generation and scoring have not been authorized by the separate second
-approval or performed. These are selection results, not a test benefit verdict.
+Validation and the locked test completed on 2026-10-06. All validity gates
+passed. Primary verdict: MARGIN_RULED_OUT. The prespecified practical advantage
+was not supported on this task under this correction and readout.
+
+## Final test result
+
+| Arm | Correct / 256 | Accuracy | Descriptive 95% interval |
+| --- | --- | --- | --- |
+| Corrected engine (primary) | 123 / 256 | 48.046875% | 45.3125% to 50.78125% |
+| Corrected integrator (primary) | 128 / 256 | 50% | 50% to 50% |
+| Raw engine | 128 / 256 | 50% | 48.828125% to 51.171875% |
+| Engine final minus start | 128 / 256 | 50% | 50% to 50% |
+| Initial state only | 128 / 256 | 50% | 50% to 50% |
+| Final input only | 128 / 256 | 50% | 50% to 50% |
+
+Engine minus integrator was -1.953125 percentage points. The paired 95%
+bootstrap interval was -4.6875 to +0.78125 percentage points, width 5.46875
+points. Its upper bound is below the predeclared +5-point margin. The corrected
+engine's absolute-accuracy lower bound also failed the above-chance requirement.
+Neither success criterion passed. The interval includes zero, so this does not
+establish that the engine is worse.
+
+The bootstrap resampled 64 complete seed blocks, jointly across models, 50,000
+times with PCG64 seed 20261005 and linear quantiles. It is conditional on the
+frozen fitted models and has approximate coverage. Diagnostic intervals are
+descriptive. No engine representation cleared chance by its declared interval
+rule. This does not prove class information is absent, especially given the
+linear readout and sign-symmetry limitation documented in REVIEW.md.
+
+The integrator did not trigger the unexpected test ceiling. Both leakage
+controls and the cue oracle passed. Test generation occurred once, only after
+the second lock was publicly committed at
+`64d410565263e4c674e15d0b55415be864f7557d`. The test authorization record cites
+the owner's existing request to check and run; it does not claim a new message
+after validation. No retuning, additional samples or replacement split occurred.
 
 The owner authorized validation and reported no known outside use of study
 seeds 2000 through 2111, qualified as "as far as I know". That qualification is
@@ -38,8 +70,9 @@ edge selections are disclosed; the grids are not expanded.
 
 Training used 32 blocks (128 episodes), validation used 16 blocks (64 episodes).
 No inference interval is reported from these selection scores. Test seeds
-2048 through 2111 and prohibited historical seeds 1040 through 1059 were not
-generated. No equations, readouts, thresholds or grids changed after exposure.
+2048 through 2111 were generated only after the final lock. Prohibited historical
+seeds 1040 through 1059 were never generated. No equations, readouts, thresholds
+or grids changed after exposure.
 
 ## Files and integrity
 
@@ -50,9 +83,11 @@ generated. No equations, readouts, thresholds or grids changed after exposure.
 - validation-report.json: all candidate scores and selected parameters.
 - validation-started.json: exclusive attempt marker.
 - validation-completed.json: SHA-256 completion receipt over the run artifacts.
+- test-approval.json and test-lock.json: second approval record and artifact lock.
+- test-started.json: exclusive test attempt marker.
+- test.json and test-report.json: all test inputs/endpoints and declared results.
 
-The lock and completion receipt were reverified after execution. To continue,
-use these files in one run directory with the pinned code/environment. A separate
-test approval must bind the exact validation-report.json digest. Do not refit,
-retune, regenerate validation or remove the attempt marker. Test generation
-requires both locks; the second lock has not yet been created.
+Both locks and the validation completion receipt were reverified after execution.
+This run is complete. Do not refit, retune, regenerate either split, or remove
+attempt markers. A follow-up experiment requires a separate protocol and fresh
+test seeds. These results do not test the disabled memory or projection modules.
