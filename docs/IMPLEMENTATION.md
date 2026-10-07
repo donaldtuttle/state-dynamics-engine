@@ -50,6 +50,39 @@ The default hold of 6 suppresses six full steps following a projection; the next
 eligible step is seven steps after that event. Only smoothing updates its own
 cache. A basin projection changes the current state without overwriting that cache.
 
+## Seed, stimulus and retention details
+
+String seeds are identifiers, not parsed numeric literals. `seedToInt` removes
+an optional `0x` prefix and hashes the remaining characters with a 31-based
+uint32 recurrence. Thus string `"0x51e1d"` and number `0x51e1d` deliberately
+select different initial conditions. Session exports retain both the entered
+seed and its normalized number. This policy is preserved for replay.
+
+Every non-quiet base stimulus is scaled by
+`0.4 + 0.6 * ((t % 64) / 64)`, a 64-tick amplitude ramp. `periodic` is therefore
+an amplitude-modulated sinusoid, not a pure sinusoid. The multiplier is applied
+before noise and memory are added. Raw-engine persistent `pulse` is distinct
+from a session's queued one-tick pulse.
+
+`shouldProjectToBasin` is a stateful guard: it advances or resets `dwellCount`.
+Do not call it once for inspection and again for commitment on the same tick.
+The first eligible check after a hold of 6 is at event step + 7. With the default
+dwell of 2, the earliest repeat projection under sustained above-threshold
+coherence is at event step + 8. The threshold and hysteresis still apply.
+
+The session retains the complete trace up to a hard maximum of 16,384 frames,
+then requires export/reset. Normal snapshots expose the newest 256 frames;
+that is a display window, not a 256-frame storage ring buffer. The raw engine's
+`run(n)` does not impose the session's cap.
+
+The effective coherence weights after expansion are 0.325 alignment, 0.1625
+calmness, 0.0975 focus and 0.415 prior coherence. Projection can subsequently
+raise the score to 0.82. Use preprojection scores when analyzing those terms.
+
+The [memory-policy diagnostic](../experiments/memory-policy-v3/README.md)
+records these controls without changing the historical numeric policy. Its
+step implementation has exact state/context/event controls, not just hashes.
+
 ## Memory Weather
 
 Memory Weather retains its distinct numerical policy, thresholds, seeded streams,

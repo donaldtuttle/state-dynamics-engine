@@ -1,0 +1,102 @@
+name: Memory policy audit
+on:
+  push:
+    branches: [main, audit/memory-policy-v3]
+    paths:
+      - '.github/workflows/memory-policy.yml'
+      - 'experiments/memory-policy-v3/**'
+      - 'scripts/memory-policy-probe-v3.ts'
+      - 'scripts/lib/memory-policy-cli.mjs'
+      - 'tests/memory-policy-v3.mjs'
+      - 'src/engine.ts'
+      - 'package*.json'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Package exact committed source for an independent clone
+        run: |
+          git rev-parse HEAD
+          git bundle create "$RUNNER_TEMP/source.bundle" HEAD
+          git bundle verify "$RUNNER_TEMP/source.bundle"
+          sha256sum "$RUNNER_TEMP/source.bundle"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: source-snapshot-${{ github.sha }}
+          path: ${{ runner.temp }}/source.bundle
+          retention-days: 7
+  clean-clone-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: '22.12.0'
+      - name: Clone published repository and verify exact commit
+        run: |
+          git clone --no-checkout "https://github.com/${GITHUB_REPOSITORY}.git" "$RUNNER_TEMP/verify-clone"
+          git -C "$RUNNER_TEMP/verify-clone" checkout --detach "$GITHUB_SHA"
+          test "$(git -C "$RUNNER_TEMP/verify-clone" rev-parse HEAD)" = "$GITHUB_SHA"
+          mkdir -p "$RUNNER_TEMP/evidence"
+          git -C "$RUNNER_TEMP/verify-clone" rev-parse HEAD > "$RUNNER_TEMP/evidence/commit.txt"
+      - name: Install pinned application dependencies
+        working-directory: ${{ runner.temp }}/verify-clone
+        run: |
+          set -o pipefail
+          npm ci 2>&1 | tee "$RUNNER_TEMP/evidence/install-root.log"
+          npm run install:apps 2>&1 | tee "$RUNNER_TEMP/evidence/install-apps.log"
+      - name: Run complete verification and site build
+        working-directory: ${{ runner.temp }}/verify-clone
+        run: |
+          set -o pipefail
+          npm run verify 2>&1 | tee "$RUNNER_TEMP/evidence/verify.log"
+          npm run build:site 2>&1 | tee "$RUNNER_TEMP/evidence/build.log"
+          git diff --exit-code
+      - name: Run full exploratory diagnostic
+        working-directory: ${{ runner.temp }}/verify-clone
+        run: |
+          set -o pipefail
+          node --experimental-strip-types scripts/memory-policy-probe-v3.ts --json "$RUNNER_TEMP/evidence/memory-policy.json" 2>&1 | tee "$RUNNER_TEMP/evidence/memory-policy.log"
+          git diff --exit-code
+          sha256sum src/engine.ts tests/fixtures/upstream-numerical.json > "$RUNNER_TEMP/evidence/preserved-pins.sha256"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: memory-policy-evidence-${{ github.sha }}
+          path: ${{ runner.temp }}/evidence
+          retention-days: 30
+  browser-screen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: '22.12.0'
+      - name: Install isolated browser tooling
+        run: |
+          npm ci
+          npm --prefix experiments/memory-policy-v3 ci
+          node experiments/memory-policy-v3/node_modules/playwright-core/cli.js install --with-deps chromium firefox webkit
+      - name: Observe exact numerical and event agreement in all three browsers
+        run: |
+          set -o pipefail
+          mkdir -p "$RUNNER_TEMP/browser-evidence"
+          cp experiments/memory-policy-v3/package-lock.json "$RUNNER_TEMP/browser-evidence/package-lock.json"
+          node --experimental-strip-types experiments/memory-policy-v3/browser-replay.mjs --observe --json "$RUNNER_TEMP/browser-evidence/browser-replay.json" 2>&1 | tee "$RUNNER_TEMP/browser-evidence/browser-replay.log"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: browser-evidence-${{ github.sha }}
+          path: ${{ runner.temp }}/browser-evidence
+          retention-days: 30

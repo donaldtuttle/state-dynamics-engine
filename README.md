@@ -62,8 +62,8 @@ One step does the following, in this order. The formulas are in
 2. If memory is on, recall the most similar stored history summary.
 3. Build this tick's input from the selected stimulus, plus seeded noise if
    noise is on, plus a fraction of the recalled summary if memory is on.
-4. Take a bounded step from that input toward the current state. Coherence
-   changes the size of the step.
+4. Compute a bounded update proportional to input minus current state.
+   Coherence changes the size of the update.
 5. Combine the step with the smoothed state and apply the bounds again.
 6. If basin projection is on, and the coherence, dwell, hysteresis, and hold
    rules allow it, blend the state most of the way toward the nearest basin
@@ -177,6 +177,25 @@ attractor network. It is not an echo-state network and not a Hopfield network.
 The distinctions, the predeclared protocol, and the one run are in
 [docs/BASELINE_PROPOSAL.md](docs/BASELINE_PROPOSAL.md) and
 [docs/BASELINE_RESULT.md](docs/BASELINE_RESULT.md).
+
+## Memory policy diagnostics
+
+The [exploratory memory-policy probe](experiments/memory-policy-v3/README.md)
+compares best-similarity, random, recent, averaged, and disabled recall without
+changing the pinned engine. It checks unrounded control trajectories and event
+timing, records per-seed measurements, and separates immediate coherence changes
+from differences that accumulate during a run. These are development diagnostics,
+not a task benchmark or a finding that memory policies are equivalent.
+
+The [first audit record](experiments/memory-policy-v3/records/20261007/RESULT.md)
+reports policy effects and a portability limit: all three tested browsers
+differed from Node in some unrounded records, although the tested diagnostic
+hashes and projection schedules matched.
+
+```bash
+npm run test:memory-policy
+npm run probe:memory-policy -- --json /tmp/memory-policy-full.json
+```
 
 ## Verify and build
 

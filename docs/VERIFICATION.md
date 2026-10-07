@@ -52,3 +52,24 @@ of its verified source and generation procedure.
 
 Browser validation and the exact commands executed for this migration are recorded
 in RELEASE_CHECKS.md. GitHub-hosted CI and deployment are separate from local tests.
+
+## Memory policy and browser portability diagnostics
+
+`npm test` also runs the memory-policy harness regression tests. The full
+24-seed diagnostic is a separate explicit command, documented in
+[the probe guide](../experiments/memory-policy-v3/README.md).
+
+State hashes are rounded, noncryptographic replay checks. Exact parity uses
+unrounded values and the preserved SHA-256 numerical records. Same-runtime
+replay does not establish portable transcendental arithmetic.
+
+The isolated Chromium/Firefox/WebKit screen uses the 72 root-engine fixture
+runs, reports numerical agreement and event schedules separately, and leaves
+Memory Weather outside its scope. Read the per-runtime result, not merely the
+CI job's success indicator: an observation job can successfully record a
+numerical mismatch. Missing runtimes and execution errors are failures.
+
+The [2026-10-07 UTC record](../experiments/memory-policy-v3/records/20261007/RESULT.md)
+found unrounded numerical mismatches in all three tested browser engines.
+All tested per-tick diagnostic hashes and projection schedules still matched.
+Do not advertise bitwise numerical identity across JavaScript engines.
