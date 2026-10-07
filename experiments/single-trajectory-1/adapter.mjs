@@ -5,14 +5,14 @@ import { stripTypeScriptTypes } from 'node:module';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import assert from 'node:assert/strict';
-import * as reference from '../../src/engine.ts';
+import * as reference from './reference-engine.ts';
 
 export const ENGINE_SHA256 = 'db7c664d2fc14b8560ef2e6975f69aca3f640a89d994881baa140dbb7ae6804f';
 export const OFF = { projection: false, memory: false, summaries: false, noise: false };
 export const RATES = [0.003125, 0.00625, 0.0125, 0.025, 0.05, 0.1, 0.2, 0.32, 0.5, 0.75, 1];
 export const SIGNS = [[-1,-1],[-1,1],[1,-1],[1,1]];
 export const DEV = [9000001, 9000002, 9000003];
-const source = readFileSync(new URL('../../src/engine.ts', import.meta.url), 'utf8');
+const source = readFileSync(new URL('./reference-engine.ts', import.meta.url), 'utf8');
 assert.equal(createHash('sha256').update(source).digest('hex'), ENGINE_SHA256, 'engine pin changed');
 const needle = 'const input = sampleInput(currentState, context, rec, noise);';
 assert.equal(source.split(needle).length, 2, 'input injection anchor must be unique');
