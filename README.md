@@ -21,6 +21,12 @@ has an effect; whether that effect is useful requires a separate task test.
 
 ## Try this
 
+**Try the demo:** [State Dynamics Lab](https://donaldtuttle.github.io/state-dynamics-engine/simulator/)
+
+The lab is the interface for the reference engine. The other hosted views are
+listed after the quick start. This repository does not send the simulation to
+a remote API.
+
 Open the lab, keep seed `0x51e1d`, choose **basin**, and press **+1** sixteen
 times. Note the state readouts and hash. Reset, turn **Adaptive noise** off,
 and repeat the sixteen steps. What changed?
@@ -28,18 +34,14 @@ and repeat the sixteen steps. What changed?
 The [quick experiment below](#quick-experiment) includes the recorded outputs
 and a command-line version.
 
-**Try the demo:** [State Dynamics Lab](https://donaldtuttle.github.io/state-dynamics-engine/simulator/)
+[![Updated State Dynamics Lab at tick 16](docs/images/lab-basin-0x51e1d-black-gold.jpg)](https://donaldtuttle.github.io/state-dynamics-engine/simulator/)
 
-The lab is the interface for the reference engine. The other hosted views are
-listed after the quick start. This repository does not send the simulation to
-a remote API.
-
-![State Dynamics Lab at tick 16](docs/images/lab-basin-0x51e1d.png)
-
-State Dynamics Lab, seed `0x51e1d`, input `basin`, tick 16, paused. The gold
-polygon and the twelve readouts are the current state. The teal trace is the
+The updated black-and-gold State Dynamics Lab, captured from the live site on
+2026-10-07: seed `0x51e1d`, input `basin`, tick 16, paused. The gold outline
+and the twelve readouts show the current state. The dashed teal trace shows the
 smoothed state. The diagnostic hash is `1559e90f`. No basin projection had
-fired. This is one real run, not a comparison score.
+fired. Click the screenshot to open the lab. This is one real run, not a
+comparison score.
 
 ## What the 12 numbers are
 
