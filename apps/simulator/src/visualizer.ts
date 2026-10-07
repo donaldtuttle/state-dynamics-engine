@@ -227,23 +227,6 @@ export class FieldVisualizer {
       context.lineWidth = 1;
       context.stroke();
     }
-    LAYERS.forEach(([key], i) => {
-      const r = radius * (0.38 + i * 0.20);
-      const enabled = state.mechanisms[key];
-      context.beginPath();
-      context.arc(0, 0, r, 0, TAU);
-      context.strokeStyle = enabled ? `rgb(${COLORS[i]})` : "rgba(197,204,214,0.14)";
-      context.lineWidth = 0.8;
-      context.stroke();
-      if (enabled) {
-        context.beginPath();
-        context.moveTo(0, -r - 3);
-        context.lineTo(0, -r + 3);
-        context.lineWidth = 2.4;
-        context.stroke();
-      }
-    });
-
     context.beginPath();
     context.arc(0, 0, radius * (0.14 + coherence * 0.2), 0, TAU);
     context.fillStyle = `rgba(196,165,116,${0.08 + coherence * 0.18})`;
@@ -302,6 +285,29 @@ export class FieldVisualizer {
     context.shadowBlur = 22;
     context.stroke();
     context.shadowBlur = 0;
+
+    // Paint channels once, above the gold body and without its bloom.
+    LAYERS.forEach(([key], i) => {
+      const r = radius * (0.38 + i * 0.20);
+      const enabled = state.mechanisms[key];
+      context.beginPath();
+      context.arc(0, 0, r, 0, TAU);
+      if (enabled) {
+        context.strokeStyle = "rgba(8,9,11,0.88)";
+        context.lineWidth = 3;
+        context.stroke();
+      }
+      context.strokeStyle = enabled ? `rgba(${COLORS[i]},0.95)` : "rgba(197,204,214,0.14)";
+      context.lineWidth = enabled ? 2.4 : 1;
+      context.stroke();
+      if (enabled) {
+        context.beginPath();
+        context.moveTo(0, -r - 3);
+        context.lineTo(0, -r + 3);
+        context.lineWidth = 2.4;
+        context.stroke();
+      }
+    });
 
     for (let i = 0; i < AXES; i += 1) {
       const point = field[i];
