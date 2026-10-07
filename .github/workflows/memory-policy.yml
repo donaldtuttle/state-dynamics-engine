@@ -1,0 +1,27 @@
+name: Memory policy audit
+on:
+  push:
+    branches: [audit/memory-policy-v3]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Package the exact committed source for an independent clone
+        run: |
+          git rev-parse HEAD
+          git bundle create "$RUNNER_TEMP/source.bundle" HEAD
+          git bundle verify "$RUNNER_TEMP/source.bundle"
+          sha256sum "$RUNNER_TEMP/source.bundle"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: source-snapshot-${{ github.sha }}
+          path: ${{ runner.temp }}/source.bundle
+          retention-days: 7
