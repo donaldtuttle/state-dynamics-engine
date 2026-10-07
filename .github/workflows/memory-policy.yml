@@ -67,22 +67,12 @@ jobs:
           node --experimental-strip-types scripts/memory-policy-probe-v3.ts --json "$RUNNER_TEMP/evidence/memory-policy.json" 2>&1 | tee "$RUNNER_TEMP/evidence/memory-policy.log"
           git diff --exit-code
           sha256sum src/engine.ts tests/fixtures/upstream-numerical.json > "$RUNNER_TEMP/evidence/preserved-pins.sha256"
-      - name: Package installed dependencies for offline independent verification
-        working-directory: ${{ runner.temp }}/verify-clone
-        run: |
-          tar -czf "$RUNNER_TEMP/installed-dependencies.tgz" node_modules apps/simulator/node_modules apps/memory-weather-lab/node_modules
-          sha256sum "$RUNNER_TEMP/installed-dependencies.tgz" > "$RUNNER_TEMP/evidence/dependencies.sha256"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
           name: memory-policy-evidence-${{ github.sha }}
           path: ${{ runner.temp }}/evidence
           retention-days: 30
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: offline-dependencies-${{ github.sha }}
-          path: ${{ runner.temp }}/installed-dependencies.tgz
-          retention-days: 7
   browser-screen:
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -96,11 +86,7 @@ jobs:
       - name: Install isolated browser tooling
         run: |
           npm ci
-          if test -f experiments/memory-policy-v3/package-lock.json; then
-            npm --prefix experiments/memory-policy-v3 ci
-          else
-            npm --prefix experiments/memory-policy-v3 install --ignore-scripts
-          fi
+          npm --prefix experiments/memory-policy-v3 ci
           node experiments/memory-policy-v3/node_modules/playwright-core/cli.js install --with-deps chromium firefox webkit
       - name: Observe exact numerical and event agreement in all three browsers
         run: |
