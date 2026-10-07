@@ -370,7 +370,7 @@ test("exported provenance and accepted stimuli cannot mutate validator baselines
   const forged = "0".repeat(40);
   (data.provenance as { engineGitBlob: string }).engineGitBlob = forged;
 
-  equal(SESSION_PROVENANCE.engineGitBlob, "7e9deb3bb47f4f615b255b701bf4a4ada41a94df", "module provenance remains pinned");
+  equal(SESSION_PROVENANCE.engineGitBlob, "ea4a6f3e66d548879535a3aa8b4182496b9242c7", "module provenance remains pinned");
   assert(!evaluateSessionCompliance(data).compliant, "forged per-export provenance rejected");
   equal(session.exportData().provenance.engineGitBlob, SESSION_PROVENANCE.engineGitBlob, "future exports remain authentic to the build pin");
   throws(

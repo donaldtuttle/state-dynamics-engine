@@ -1,0 +1,57 @@
+name: Basin ledger browser checks
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/basin-ledger.yml'
+      - 'src/engine.ts'
+      - 'apps/simulator/**'
+      - 'scripts/check-basin-ledger-browser.mjs'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/basin-ledger.yml'
+      - 'src/engine.ts'
+      - 'apps/simulator/**'
+      - 'scripts/check-basin-ledger-browser.mjs'
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: '22.12.0'
+      - name: Install locked dependencies and build the site
+        run: |
+          npm ci
+          npm run install:apps
+          npm run test:basin-projection
+          npm run build:site
+          npm --prefix experiments/memory-policy-v3 ci
+          node experiments/memory-policy-v3/node_modules/playwright-core/cli.js install --with-deps chromium
+      - name: Inspect built desktop and mobile ledgers
+        run: |
+          set -o pipefail
+          mkdir -p "$RUNNER_TEMP/ledger-evidence"
+          git rev-parse HEAD > "$RUNNER_TEMP/ledger-evidence/commit.txt"
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory _site > "$RUNNER_TEMP/ledger-server.log" 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID"' EXIT
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:4173/simulator/ > /dev/null; then break; fi
+            sleep 1
+          done
+          NODE_PATH="$PWD/experiments/memory-policy-v3/node_modules" node scripts/check-basin-ledger-browser.mjs http://127.0.0.1:4173/simulator/ "$RUNNER_TEMP/ledger-evidence" 2>&1 | tee "$RUNNER_TEMP/ledger-evidence/browser.log"
+          test -z "$(git status --porcelain)"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: basin-ledger-${{ github.event.pull_request.head.sha || github.sha }}
+          path: ${{ runner.temp }}/ledger-evidence
+          retention-days: 30

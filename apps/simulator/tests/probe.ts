@@ -50,7 +50,7 @@ test("compact probe declares the real engine seam and no fallback", () => {
   equal(PROBE_RUNTIME.implementation, "State Dynamics Engine (12D)", "implementation identity");
   equal(PROBE_RUNTIME.transitionPath, "SimulationSession.step/tick to stepSimulation", "transition path");
   equal(PROBE_RUNTIME.fallback, false, "fallback disabled");
-  equal(PROBE_RUNTIME.engineGitBlob, "7e9deb3bb47f4f615b255b701bf4a4ada41a94df", "engine pin");
+  equal(PROBE_RUNTIME.engineGitBlob, "ea4a6f3e66d548879535a3aa8b4182496b9242c7", "engine pin");
 });
 
 test("signed radar exposes its zero baseline", () => {

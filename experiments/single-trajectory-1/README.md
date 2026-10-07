@@ -4,6 +4,17 @@ Status: DESIGN. Read [the protocol](PROTOCOL.md) and [design review](REVIEW.md).
 No study trajectories, fitted study coefficients, approval records or run locks
 are committed. Historical baseline files and production dynamics are unchanged.
 
+## Frozen implementation source
+
+`reference-engine.ts` is an exact byte copy of the engine pinned by the
+protocol, SHA-256 `db7c664d2fc14b8560ef2e6975f69aca3f640a89d994881baa140dbb7ae6804f`.
+The adapter and lifecycle guards read this snapshot so additive production
+telemetry changes cannot redefine the proposed experiment. Its hash checks,
+protocol, seed allowlists, numerical fixtures and approval gates are unchanged.
+The source inventory now locks this snapshot path. Previously created run locks
+remain tied to their original tooling commit and are not silently migrated.
+No study is registered or executed by this maintenance change.
+
 ## Development checks
 
 Use Node 24.19.0 (module type stripping is required) and Python with NumPy.

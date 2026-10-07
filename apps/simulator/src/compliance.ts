@@ -16,6 +16,7 @@ import {
   PERSISTENT_STIMULI,
   SESSION_SCOPE,
   SESSION_PROVENANCE,
+  PRE_LEDGER_ENGINE_BLOB,
   SESSION_ENGINE,
   SESSION_SCHEMA_VERSION,
   type SessionExport,
@@ -110,6 +111,9 @@ function eventIsIntegral(event: BasinProjectionEvent): boolean {
     && event.basinId < 6
     && Number.isFinite(event.energyDrop)
     && event.energyDrop >= 0
+    && (!Object.hasOwn(event, "projectionDistance")
+      || (Number.isFinite(event.projectionDistance) && event.projectionDistance! >= 0))
+    && (!Object.hasOwn(event, "normChange") || Number.isFinite(event.normChange))
     && Number.isFinite(event.coherenceScore)
     && event.coherenceScore >= 0
     && event.coherenceScore <= 1
@@ -143,7 +147,9 @@ export function evaluateSessionCompliance(data: SessionExport): ComplianceReport
       && typeof data.stateId === "string"
       && data.stateId.length >= 1
       && data.stateId.length <= 64
-      && sameJson(data.provenance, SESSION_PROVENANCE),
+      && (data.provenance.engineGitBlob === SESSION_PROVENANCE.engineGitBlob
+        || data.provenance.engineGitBlob === PRE_LEDGER_ENGINE_BLOB)
+      && sameJson({ ...data.provenance, engineGitBlob: SESSION_PROVENANCE.engineGitBlob }, SESSION_PROVENANCE),
     "Export identifies the session schema, State Dynamics Engine, source pins, and claim boundary.",
   );
 
@@ -338,7 +344,7 @@ export function evaluateSessionCompliance(data: SessionExport): ComplianceReport
   add(
     "replay-consistency",
     replayMatches,
-    "Seed, fixed configuration, per-tick stimulus schedule, frames, events, memory, and every diagnostic hash reproduce exactly.",
+    "Seed, configuration, schedule, frames, recorded event fields, memory, and hashes reproduce exactly; absent optional projection metrics remain absent.",
   );
 
   const failures = checks.filter((check) => check.status === "fail");
@@ -379,7 +385,18 @@ function replaySessionExport(data: SessionExport): SessionExport {
   if (data.pulsePending) replay.queuePulse();
   if (data.playing) replay.play();
   else replay.pause();
-  return replay.exportData();
+  const exported = replay.exportData();
+  // Identity above accepts only the two reviewed source pins. Preserve the
+  // recorded pin and omit only metrics absent from each historical event.
+  // Present values still have to match replay exactly; never fill the input.
+  exported.provenance.engineGitBlob = data.provenance.engineGitBlob;
+  exported.eventHistory.events.forEach((event, index) => {
+    const recorded = data.eventHistory.events[index];
+    for (const key of ["projectionDistance", "normChange"] as const) {
+      if (recorded && !Object.hasOwn(recorded, key)) delete event[key];
+    }
+  });
+  return exported;
 }
 
 /**

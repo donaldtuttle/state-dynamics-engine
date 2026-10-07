@@ -786,6 +786,24 @@ button {
   color: var(--gold);
 }
 
+.event-item header {
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.event-metrics {
+  display: grid;
+  gap: 4px;
+  margin-left: auto;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.event-norm {
+  color: var(--muted);
+  font-weight: 500;
+}
+
 .empty-state {
   display: grid;
   min-height: 110px;

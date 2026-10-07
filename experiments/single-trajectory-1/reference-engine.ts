@@ -52,10 +52,6 @@ export type BasinProjectionEvent = {
   energyDrop: number;
   basinId: number;
   coherenceScore: number;
-  /** Euclidean displacement caused only by this projection; absent in older exports. */
-  projectionDistance?: number;
-  /** Signed post-minus-pre vector norm; absent in older exports. */
-  normChange?: number;
 };
 
 export type MemorySummary = { id: number; latent: Vector; coherenceScore: number; step: number };
@@ -349,8 +345,6 @@ export function projectTowardBasin(currentState: SimulationState, context: Simul
       preHash: pre, postHash: hashState(next),
       energyDrop: Math.max(0, norm(currentState.latent) - norm(next.latent)),
       basinId: id, coherenceScore: next.coherence,
-      projectionDistance: norm(sub(next.latent, currentState.latent)),
-      normChange: norm(next.latent) - norm(currentState.latent),
     },
   };
 }

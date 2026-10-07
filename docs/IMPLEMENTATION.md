@@ -50,6 +50,14 @@ The default hold of 6 suppresses six full steps following a projection; the next
 eligible step is seven steps after that event. Only smoothing updates its own
 cache. A basin projection changes the current state without overwriting that cache.
 
+The Basin Projection Ledger reports the Euclidean displacement from the input
+of `projectTowardBasin()` to its final bounded result as **State change**.
+**Norm change** separately reports the signed change in vector magnitude.
+These event measurements do not feed back into any update equation. The older
+`energyDrop` field remains a clamped norm decrease. See the
+[trace format](TRACE_FORMAT.md#basin-projection-metrics) for definitions and the
+fallback used when old events lack displacement data.
+
 ## Seed, stimulus and retention details
 
 String seeds are identifiers, not parsed numeric literals. `seedToInt` removes

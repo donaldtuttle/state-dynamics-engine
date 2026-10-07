@@ -18,6 +18,7 @@ import analysis
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 PROTOCOL = HERE / 'PROTOCOL.md'
+ENGINE_PATH = HERE / 'reference-engine.ts'
 ENGINE_HASH = 'db7c664d2fc14b8560ef2e6975f69aca3f640a89d994881baa140dbb7ae6804f'
 SPLITS = {'train':list(range(2000,2032)), 'validation':list(range(2032,2048)), 'test':list(range(2048,2112))}
 DEV = [9000001,9000002,9000003]
@@ -55,7 +56,7 @@ def environment():
 
 def sources():
     paths = sorted(p for p in HERE.iterdir() if p.suffix in ('.md','.py','.mjs','.txt'))
-    paths += [ROOT/'src/engine.ts',ROOT/'package-lock.json'] + HISTORICAL
+    paths += [ENGINE_PATH,ROOT/'package-lock.json'] + HISTORICAL
     return {str(p.relative_to(ROOT)):digest(p) for p in paths}
 
 def check_seed(seed, split):
@@ -123,7 +124,7 @@ def verify_validation(directory):
     if (lock.get('schema') != 'single-trajectory-1/validation-lock/v1' or
         lock.get('sources') != sources() or lock.get('environment') != environment() or
         lock.get('splits') != SPLITS or lock.get('engine_sha256') != ENGINE_HASH or
-        digest(ROOT/'src/engine.ts') != ENGINE_HASH):
+        digest(ENGINE_PATH) != ENGINE_HASH):
         raise ValueError('code, seeds, runtime or engine changed after lock')
     if lock['approval'] != approval(directory/'validation-approval.json','validation'):
         raise ValueError('approval changed')
@@ -174,7 +175,7 @@ def generate(directory, split):
 
 def create_validation_lock(directory, approval_path, audit_path):
     accepted = approval(approval_path,'validation'); reviewed = audit(audit_path)
-    if digest(ROOT/'src/engine.ts') != ENGINE_HASH: raise ValueError('engine pin changed')
+    if digest(ENGINE_PATH) != ENGINE_HASH: raise ValueError('engine pin changed')
     # An isolated new run directory is required; no reusable locks over old data.
     directory.mkdir(parents=True,exist_ok=False)
     result = subprocess.run(['node','--experimental-strip-types','--input-type=module','-e',
@@ -242,7 +243,7 @@ def main():
     parser.add_argument('--split',choices=list(SPLITS))
     args = parser.parse_args()
     if args.command == 'design-check':
-        if digest(ROOT/'src/engine.ts') != ENGINE_HASH: raise ValueError('engine pin changed')
+        if digest(ENGINE_PATH) != ENGINE_HASH: raise ValueError('engine pin changed')
         print(json.dumps({'status':'DESIGN','protocol_sha256':digest(PROTOCOL),
                           'sources':sources(),'environment':environment(),'generated_trajectories':0},indent=2)); return
     if args.directory is None: raise ValueError('--directory required')

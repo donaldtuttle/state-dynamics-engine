@@ -76,6 +76,12 @@ class Algebra(unittest.TestCase):
         self.assertEqual(a.summarize(scores)['verdict'],'UNEXPECTED_TEST_CEILING')
 
 class Guards(unittest.TestCase):
+    def test_frozen_engine_snapshot_is_pinned_and_covered_by_source_lock(self):
+        self.assertEqual(r.digest(r.ENGINE_PATH), r.ENGINE_HASH)
+        self.assertIn(r.ENGINE_HASH, r.PROTOCOL.read_text())
+        self.assertEqual(r.sources()[str(r.ENGINE_PATH.relative_to(r.ROOT))], r.ENGINE_HASH)
+        self.assertNotIn('src/engine.ts', r.sources())
+
     def make_locked_fixture(self, root):
         # Test-only approval records live in a temporary directory. No real
         # experiment or generator is called; these exercise lifecycle plumbing.

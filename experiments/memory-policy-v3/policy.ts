@@ -1,4 +1,4 @@
-/** Exploratory memory-policy realization, audit revision 3.1. Engine unchanged. */
+/** Exploratory memory-policy realization, audit revision 3.1. Numerical engine policy unchanged. */
 import {
   updateSmoothedState, retrieveSimilarMemory, sampleAdaptiveNoise, sampleInput,
   computeStateUpdate, combineStateAndUpdate, computeCoherenceScore,
@@ -7,7 +7,8 @@ import {
   type DiagnosticFrame, type BasinProjectionEvent, type InputSample, type StateUpdate,
 } from "../../src/engine.ts";
 
-export const ENGINE_BLOB = "7e9deb3bb47f4f615b255b701bf4a4ada41a94df";
+// Supported source revision adds projection telemetry only; dated records retain their original pin.
+export const ENGINE_BLOB = "ea4a6f3e66d548879535a3aa8b4182496b9242c7";
 export const POLICIES = ["A_argmax", "B_random", "C_recent", "D_mean", "E_off"] as const;
 export type Policy = typeof POLICIES[number];
 export const STIMULI = ["quiet", "align", "disrupt", "pulse", "periodic", "basin"] as const;
