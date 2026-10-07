@@ -1,0 +1,5 @@
+{
+  "extends": "../../tsconfig.json",
+  "include": ["policy.ts", "../../src/engine.ts"],
+  "exclude": []
+}

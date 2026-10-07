@@ -1,0 +1,10 @@
+{
+  "name": "state-dynamics-memory-policy-audit",
+  "version": "3.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Isolated development tools for the memory policy diagnostic and browser portability screen",
+  "devDependencies": {
+    "playwright-core": "1.57.0"
+  }
+}
