@@ -680,6 +680,11 @@ button {
 
 .chart-card {
   min-height: 290px;
+  /* Keep telemetry colors local to the trace graph and its legend. */
+  --cyan: #58d7ca;
+  --gold: #f5c978;
+  --coral: #ff7d8b;
+  --blue: #76a9ff;
 }
 
 .chart-legend {
@@ -1130,14 +1135,6 @@ button {
   border-radius: 12px;
 }
 #field-canvas:focus-visible { outline: 2px solid #c5ccd6; outline-offset: -3px; }
-.trace-chart path.series { stroke: #c5ccd6; }
-.trace-chart path.series:nth-of-type(2) { stroke: #ecece8; }
-.trace-chart path.series:nth-of-type(3) { stroke: #8b8d93; }
-.trace-chart path.series:nth-of-type(4) { stroke: #5c5e66; }
-.chart-legend span { color: #c5ccd6 !important; }
-.chart-legend span:nth-child(2) { color: #ecece8 !important; }
-.chart-legend span:nth-child(3) { color: #8b8d93 !important; }
-.chart-legend span:nth-child(4) { color: #5c5e66 !important; }
 .operator-item strong, .event-item .event-delta, .status-chip.projection strong {
   color: var(--text);
 }
