@@ -46,7 +46,9 @@ async function sampleState(page) {
         const i = (y * width + x) * 4;
         const [red, green, blue, alpha] = pixels.subarray(i, i + 4);
         if (alpha > 100 && red + green + blue > 180) visible++;
-        if (alpha > 180 && red > 180 && green > 150 && blue < green * 0.9 && red >= green) gold++;
+        // Bright cream/gold distinguishes the state stroke from the darker
+        // projection ring, translucent hub and copper motes.
+        if (alpha > 180 && red > 220 && green > 190 && blue < green * 0.9 && red >= green) gold++;
       }
     }
     return {width, height, visible, gold};
