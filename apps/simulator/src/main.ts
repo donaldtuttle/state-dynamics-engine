@@ -493,6 +493,10 @@ function refresh(lastStep?: SessionStep): void {
     step: snapshot.currentState.t,
     inputStrength: latest?.inputStrength ?? snapshot.currentState.inputStrength,
     projected: Boolean(lastStep?.events.length),
+    mechanisms: snapshot.config.mechanisms,
+    summaries: snapshot.memorySummaries,
+    // The session does not expose its latest recall packet. Do not retrieve again.
+    recall: null,
   });
   canvas.setAttribute("aria-label", `Twelve-axis state view at tick ${snapshot.currentState.t}; coherence ${format(latest?.coherenceScore ?? snapshot.currentState.coherence)}; ${snapshot.pulsePending ? "pulse queued" : "activate to queue a pulse"}.`);
 }
