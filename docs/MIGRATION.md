@@ -31,6 +31,22 @@ TypeScript definitions are authoritative for the successor API.
 - Memory Weather replay: `memory-weather-replay/v2`.
 - Site manifest: `state-dynamics-site/v1`.
 
+The projection-ledger correction adds optional `projectionDistance` and
+`normChange` event fields without changing the session or state-hash versions.
+The numerical trajectory, old fields and hash arithmetic are unchanged, so a
+schema bump is unnecessary. New exports identify engine blob
+`ea4a6f3e66d548879535a3aa8b4182496b9242c7`. Current compliance checks also accept
+the previous v2 blob `7e9deb3bb47f4f615b255b701bf4a4ada41a94df`, with all other
+provenance fields still checked. Unknown engine blobs remain rejected.
+
+Replay compares every recorded value, omitting only optional event metrics
+absent from the input and retaining its accepted source pin for comparison.
+Old events are not populated or relabeled as displacement. The v1 migration
+adapter still validates the historical record before replaying it into a new
+export, which now includes the measured metrics. Historical fixtures are not
+regenerated. Older application builds with strict source-pin checks will not
+accept new exports; use the current validator for both supported v2 revisions.
+
 The reference engine's default state ID changes to `state`. Its existing FNV
 diagnostic algorithm includes that ID in the hashed text. Renamed Memory Weather
 JSON fields also affect its FNV hashes. These hashes are useful replay diagnostics,

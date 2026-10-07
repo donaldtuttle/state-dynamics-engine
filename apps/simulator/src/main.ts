@@ -12,6 +12,7 @@ import {
   type SessionStep,
 } from "./session.ts";
 import { FieldVisualizer } from "./visualizer.ts";
+import { createProjectionLedgerItem } from "./projection-ledger.ts";
 
 const app = document.querySelector<HTMLDivElement>("#app");
 if (!app) throw new Error("Missing #app root");
@@ -391,13 +392,7 @@ function updateEvents(snapshot: SessionSnapshot): void {
     list.innerHTML = '<li class="empty-state">No Basin projection event yet. Basin drive or a lower threshold makes the implementation-specific predicate easier to reach.</li>';
     return;
   }
-  list.replaceChildren(...eventHistory.events.slice().reverse().map((event) => {
-    const item = document.createElement("li");
-    item.className = "event-item";
-    const label = BASINS[event.basinId]?.label ?? `basin ${event.basinId}`;
-    item.innerHTML = `<header><span>t=${event.step}  /  ${label}</span><span class="event-delta">Change ${format(event.energyDrop)}</span></header><p>${event.reason}<br>${event.preHash} to ${event.postHash}</p>`;
-    return item;
-  }));
+  list.replaceChildren(...eventHistory.events.slice().reverse().map(createProjectionLedgerItem));
 }
 
 function updateMesh(snapshot: SessionSnapshot): void {

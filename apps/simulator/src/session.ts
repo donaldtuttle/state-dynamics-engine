@@ -22,12 +22,17 @@ export const SESSION_ENGINE = "State Dynamics Engine (12D)" as const;
 export const SESSION_SCOPE = "Experimental bounded 12-dimensional software simulation." as const;
 export const SESSION_PROVENANCE = {
   enginePath: "src/engine.ts",
-  engineGitBlob: "7e9deb3bb47f4f615b255b701bf4a4ada41a94df",
+  engineGitBlob: "ea4a6f3e66d548879535a3aa8b4182496b9242c7",
   sourceRepository: "https://github.com/donaldtuttle/qoft-calculus",
   sourceCommit: "1ab947e0cb75afaf0e7ecad11a8aa5e02b510ebc",
   hashVersion: "state-dynamics-state/v2",
 } as const;
 Object.freeze(SESSION_PROVENANCE);
+// The previous v2 source differs only in projection-event telemetry.
+export const PRE_LEDGER_ENGINE_BLOB = "7e9deb3bb47f4f615b255b701bf4a4ada41a94df" as const;
+export type SessionProvenance = Omit<typeof SESSION_PROVENANCE, "engineGitBlob"> & {
+  engineGitBlob: typeof SESSION_PROVENANCE.engineGitBlob | typeof PRE_LEDGER_ENGINE_BLOB;
+};
 export const PERSISTENT_STIMULI = Object.freeze(["quiet", "align", "disrupt", "periodic", "basin"] as const);
 
 export type PersistentStimulus = (typeof PERSISTENT_STIMULI)[number];
@@ -114,7 +119,7 @@ export type SessionSnapshot = {
 
 export type SessionExport = SessionSnapshot & {
   claimBoundary: typeof SESSION_SCOPE;
-  provenance: typeof SESSION_PROVENANCE;
+  provenance: SessionProvenance;
   frames: DiagnosticFrame[];
   hashes: string[];
   stimulusSchedule: Stimulus[];

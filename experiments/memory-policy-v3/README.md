@@ -1,8 +1,11 @@
 # Memory policy diagnostic, revision 3.1
 
 Status: DEVELOP / exploratory. This is not a registered utility evaluation.
-Implementation: root `src/engine.ts`, Git blob
-`7e9deb3bb47f4f615b255b701bf4a4ada41a94df`.
+Current supported source: root `src/engine.ts`, Git blob
+`ea4a6f3e66d548879535a3aa8b4182496b9242c7`. This source adds projection distance and signed norm
+telemetry only. The diagnostic policy and numerical controls are unchanged.
+The dated execution below used `7e9deb3bb47f4f615b255b701bf4a4ada41a94df`;
+its records, source hashes, and numerical fixtures are retained unchanged.
 
 ## What this answers
 
