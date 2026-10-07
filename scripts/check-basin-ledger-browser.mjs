@@ -19,8 +19,9 @@ try {
     if (viewport.width < 820) await page.locator('#controls-toggle').click();
     await page.locator('[data-mode="basin"]').click();
     const threshold = page.locator('#projectionThreshold-range');
-    await threshold.fill('0.40');
-    await threshold.dispatchEvent('change');
+    await threshold.press('Home');
+    await threshold.press('Tab');
+    assert.equal(await threshold.inputValue(), '0.4');
     for (let i = 0; i < 40; i++) await page.locator('#step-button').click();
     const downloadPromise = page.waitForEvent('download');
     await page.locator('#export-button').click();
