@@ -179,13 +179,14 @@ app.innerHTML = `
             <div>
               <div class="section-kicker">Executable implementation checks</div>
               <h2>Determinism and invariant verification</h2>
-              <p class="section-note">Checks rerun the browser-safe engine locally. Passing means this implementation is repeatable under the tested conditions; it checks the software behavior described here.</p>
+              <p class="section-note">Seven checks use fixed engine scenarios. Current export replay checks your session at the seed and tick recorded below. Results clear when the run changes.</p>
             </div>
             <button class="primary-button" id="run-checks-button">Run checks</button>
           </header>
           <div class="verify-grid">
             <article class="card checks-card">
               <div class="metric-top"><span class="metric-label">Check results</span><span class="control-value" id="check-overall">not run</span></div>
+              <p class="section-note" id="check-context" role="status" aria-live="polite">No session has been checked.</p>
               <ul class="check-list" id="check-list"><li class="empty-state">Run the checks to compare deterministic replays, projection integrity, trace alignment, pulse scheduling, and mechanisms.</li></ul>
             </article>
             <article class="card scope-card">
@@ -279,6 +280,7 @@ let session: SimulationSession = createSession({ runId, seed: "0x51e1d" });
 let intervalMs = 180;
 let timer: number | undefined;
 let toastTimer: number | undefined;
+let verifiedSnapshotKey: string | undefined;
 
 const text = (selector: string, value: string | number): void => {
   required<HTMLElement>(selector).textContent = String(value);
@@ -454,6 +456,9 @@ function updateControls(snapshot: SessionSnapshot): void {
 
 function refresh(lastStep?: SessionStep): void {
   const snapshot = session.snapshot();
+  if (verifiedSnapshotKey !== undefined && verifiedSnapshotKey !== verificationSnapshotKey(snapshot)) {
+    clearVerification("Session changed. Run checks again.");
+  }
   const frames = snapshot.recentFrames;
   const latest = snapshot.latestFrame;
 
@@ -525,6 +530,7 @@ function syncTimer(): void {
 function resetSession(seed?: string | number, playing?: boolean): void {
   try {
     session.reset({ seed, playing });
+    clearVerification("Run reset. Run checks to verify this session.");
     refresh();
     syncTimer();
   } catch (error) {
@@ -577,7 +583,25 @@ function selectView(view: string): void {
   if (view === "field") window.requestAnimationFrame(() => refresh());
 }
 
-function renderCompliance(report: ComplianceReport): void {
+function verificationSnapshotKey(snapshot: SessionSnapshot): string {
+  // Transport speed and play/pause do not change the checked trajectory.
+  return JSON.stringify([
+    snapshot.seedInput, snapshot.frameCount, snapshot.stateHash,
+    snapshot.persistentStimulus, snapshot.pulsePending, snapshot.config,
+  ]);
+}
+
+function clearVerification(message: string): void {
+  verifiedSnapshotKey = undefined;
+  text("#check-overall", "not run");
+  text("#check-context", message);
+  const item = document.createElement("li");
+  item.className = "empty-state";
+  item.textContent = "Run the checks to compare deterministic replays, projection integrity, trace alignment, pulse scheduling, and mechanisms.";
+  required<HTMLUListElement>("#check-list").replaceChildren(item);
+}
+
+function renderCompliance(report: ComplianceReport, snapshot: SessionSnapshot): void {
   const list = required<HTMLUListElement>("#check-list");
   list.replaceChildren(...report.checks.map((check) => {
     const item = document.createElement("li");
@@ -589,6 +613,8 @@ function renderCompliance(report: ComplianceReport): void {
   const passed = report.checks.filter((check) => check.status === "pass").length;
   const notTested = report.checks.filter((check) => check.status === "not-tested").length;
   text("#check-overall", `${passed}/${report.checks.length} pass${notTested ? `  /  ${notTested} not tested` : ""}`);
+  verifiedSnapshotKey = verificationSnapshotKey(snapshot);
+  text("#check-context", `Checked seed ${String(snapshot.seedInput)} at tick ${snapshot.frameCount}; state hash ${snapshot.stateHash}.`);
 }
 
 function stepOnce(): void {
@@ -701,10 +727,15 @@ required<HTMLButtonElement>("#run-checks-button").addEventListener("click", () =
   const button = required<HTMLButtonElement>("#run-checks-button");
   button.disabled = true;
   button.textContent = "Checking...";
+  clearVerification("Checking the current session...");
   window.setTimeout(() => {
     try {
-      renderCompliance(runImplementationVerification(session.exportData()));
+      const current = session.exportData();
+      renderCompliance(runImplementationVerification(current), current);
       selectView("verify");
+    } catch (error) {
+      clearVerification("Checks could not complete. Run checks again.");
+      showToast(error instanceof Error ? error.message : "Verification could not complete.");
     } finally {
       button.disabled = false;
       button.textContent = "Run checks";
