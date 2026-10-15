@@ -68,6 +68,27 @@ async function sampleRing(page, fraction) {
   }, fraction);
 }
 
+async function sampleCentralMarkers(page) {
+  return page.locator('#field-canvas').evaluate(canvas => {
+    const {width, height} = canvas;
+    const pixels = canvas.getContext('2d').getImageData(0, 0, width, height).data;
+    const limit = Math.min(width, height) * 0.46 * 0.18;
+    let blue = 0, gold = 0, neutral = 0;
+    for (let y = Math.floor(height / 2 - limit); y <= height / 2 + limit; y++) {
+      for (let x = Math.floor(width / 2 - limit); x <= width / 2 + limit; x++) {
+        if (Math.hypot(x - width / 2, y - height / 2) > limit) continue;
+        const i = (y * width + x) * 4;
+        const [r, g, b, a] = pixels.subarray(i, i + 4);
+        if (a < 180) continue;
+        if (b > 200 && b > r * 1.35 && b > g * 1.1) blue++;
+        if (r > 200 && g > 140 && g < 220 && b < 150) gold++;
+        if (r > 210 && g > 210 && b > 225) neutral++;
+      }
+    }
+    return {blue, gold, neutral};
+  });
+}
+
 function changedPixels(a, b) {
   let changed = 0;
   for (let i = 0; i < Math.min(a.length, b.length); i += 4) {
@@ -125,8 +146,18 @@ try {
         assert.ok(changed > 4, layer.name + ' must visibly change its own ring');
         ringChanges.push({name: layer.name, changedPixels: changed});
       }
+
+      // Exercise real history through the controls. The small central markers
+      // must remain separately visible above the filled state, including mobile.
+      for (let i = 0; i < 24; i++) await page.locator('#step-button').click();
+      await afterPaint(page);
+      const markers = await sampleCentralMarkers(page);
+      assert.ok(markers.blue > 8, 'History summary markers must be visible: ' + JSON.stringify(markers));
+      assert.ok(markers.gold > 8, 'Basin references must be visible: ' + JSON.stringify(markers));
+      assert.ok(markers.neutral > 8, 'Latest state locator must be visible: ' + JSON.stringify(markers));
+      await page.locator('.stage-card').screenshot({path: path.join(outputDir, 'field-markers-' + viewport.width + '.png')});
       assert.deepEqual(errors, []);
-      results.push({viewport, normal, reduced, ringChanges, errors});
+      results.push({viewport, normal, reduced, ringChanges, markers, errors});
     } catch (error) {
       await page.screenshot({path: path.join(outputDir, 'field-failure-' + viewport.width + '.png')}).catch(() => {});
       throw error;
