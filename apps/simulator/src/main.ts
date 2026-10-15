@@ -57,7 +57,7 @@ app.innerHTML = `
                 <div class="legend" aria-label="Field legend">
                   <span class="legend-item legend-field">Current state</span>
                   <span class="legend-item legend-smoothed">Smoothed state</span>
-                  <span class="legend-item legend-update">Update direction</span>
+                  <span class="legend-item legend-update">Update strength</span>
                 </div>
               </header>
               <canvas

@@ -306,9 +306,9 @@ button {
   content: "";
 }
 
-.legend-field { color: var(--gold); }
-.legend-smoothed { color: #6e9b96; }
-.legend-update { color: #c4a574; }
+.legend-field { color: #ffe3a1; }
+.legend-smoothed { color: #51dfd2; }
+.legend-update { color: #f2bf67; }
 
 #field-canvas {
   display: block;
@@ -1061,10 +1061,10 @@ button {
 }
 
 /* Mechanism colors are shared by their ring, legend chip, row and switch. */
-.mechanism-chip[data-mechanism="projection"], .switch-row:nth-child(1) { --mechanism-color: #c4a574; }
-.mechanism-chip[data-mechanism="memory"], .switch-row:nth-child(2) { --mechanism-color: #6e9b96; }
-.mechanism-chip[data-mechanism="summaries"], .switch-row:nth-child(3) { --mechanism-color: #8ea0b8; }
-.mechanism-chip[data-mechanism="noise"], .switch-row:nth-child(4) { --mechanism-color: #c4897a; }
+.mechanism-chip[data-mechanism="projection"], .switch-row:nth-child(1) { --mechanism-color: #f2bf67; }
+.mechanism-chip[data-mechanism="memory"], .switch-row:nth-child(2) { --mechanism-color: #51dfd2; }
+.mechanism-chip[data-mechanism="summaries"], .switch-row:nth-child(3) { --mechanism-color: #8ab7ff; }
+.mechanism-chip[data-mechanism="noise"], .switch-row:nth-child(4) { --mechanism-color: #ff957d; }
 
 .mechanism-legend {
   display: flex;
@@ -1090,13 +1090,13 @@ button {
 .mechanism-chip::before {
   content: "";
   flex: none;
-  width: 6px;
-  height: 6px;
+  width: 9px;
+  height: 9px;
   border: 1px solid currentColor;
   border-radius: 50%;
   background: currentColor;
 }
-.mechanism-chip[data-enabled="false"] { color: #5c5e66; }
+.mechanism-chip[data-enabled="false"] { color: #858b97; }
 .mechanism-chip[data-enabled="false"]::before { background: transparent; }
 
 .switch-row {

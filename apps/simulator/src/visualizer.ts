@@ -19,7 +19,8 @@ type Point = { x: number; y: number };
 type Mote = { angle: number; radius: number; speed: number; life: number };
 const TAU = Math.PI * 2;
 const AXES = 12;
-const COLORS = ["196,165,116", "110,155,150", "142,160,184", "196,137,122"];
+const COLORS = ["242,191,103", "81,223,210", "138,183,255", "255,149,125"];
+const MARKER_OUTLINE = "#0a0b0d";
 const LAYERS = [
   ["projection", "Basin projection"],
   ["memory", "Memory influence"],
@@ -52,6 +53,16 @@ function centroid(points: Point[]): Point {
     x: points.reduce((sum, p) => sum + p.x, 0) / points.length,
     y: points.reduce((sum, p) => sum + p.y, 0) / points.length,
   };
+}
+
+function drawFilledMarker(context: CanvasRenderingContext2D, point: Point, radius: number, color: string): void {
+  context.beginPath();
+  context.arc(point.x, point.y, radius, 0, TAU);
+  context.fillStyle = color;
+  context.fill();
+  context.strokeStyle = MARKER_OUTLINE;
+  context.lineWidth = 2;
+  context.stroke();
 }
 
 function spline(context: CanvasRenderingContext2D, points: Point[]): void {
@@ -223,7 +234,7 @@ export class FieldVisualizer {
       context.beginPath();
       context.moveTo(Math.cos(angle) * radius * 0.18, Math.sin(angle) * radius * 0.18);
       context.lineTo(Math.cos(angle) * radius * 1.02, Math.sin(angle) * radius * 1.02);
-      context.strokeStyle = "rgba(197,204,214,0.28)";
+      context.strokeStyle = "rgba(197,204,214,0.36)";
       context.lineWidth = 1;
       context.stroke();
     }
@@ -235,42 +246,17 @@ export class FieldVisualizer {
     context.lineWidth = 1;
     context.stroke();
 
-    // Keep the committed trail binding, without painting stale stroke trails.
-    // The latest committed point is a quiet neutral locator, not a summary.
-    const lastTrail = state.trail.at(-1);
-    if (lastTrail) {
-      const point = centroid(starPoints(lastTrail, radius));
-      context.beginPath();
-      context.arc(point.x, point.y, 1.5, 0, TAU);
-      context.fillStyle = "rgba(197,204,214,0.3)";
-      context.fill();
-    }
-
-    if (state.mechanisms.projection) {
-      // Neutral dashed basin markers; no inferred selection or second gold star.
-      for (const basin of BASINS) {
-        const point = centroid(starPoints(basin.latent, radius));
-        context.beginPath();
-        context.setLineDash([2, 3]);
-        context.arc(point.x, point.y, 4, 0, TAU);
-        context.strokeStyle = "rgba(196,165,116,0.45)";
-        context.lineWidth = 1;
-        context.stroke();
-      }
-      context.setLineDash([]);
-    }
-
     spline(context, starPoints(this.displaySmoothed, radius, 0.42));
-    context.setLineDash([3, 5]);
-    context.strokeStyle = state.mechanisms.memory ? "rgba(110,155,150,0.7)" : "rgba(236,236,232,0.28)";
-    context.lineWidth = 1.4;
+    context.setLineDash([5, 5]);
+    context.strokeStyle = state.mechanisms.memory ? "rgba(81,223,210,0.95)" : "rgba(236,236,232,0.4)";
+    context.lineWidth = 2.2;
     context.stroke();
     context.setLineDash([]);
 
     if (state.mechanisms.memory && state.recall) {
       spline(context, starPoints(state.recall.latent, radius, 0.38));
-      context.strokeStyle = `rgba(110,155,150,${0.35 + 0.4 * clamp(state.recall.similarity, 0, 1)})`;
-      context.lineWidth = 1.6;
+      context.strokeStyle = `rgba(81,223,210,${0.55 + 0.4 * clamp(state.recall.similarity, 0, 1)})`;
+      context.lineWidth = 2.2;
       context.stroke();
     }
 
@@ -279,10 +265,10 @@ export class FieldVisualizer {
     context.fillStyle = `rgba(232,213,154,${0.14 + coherence * 0.16})`;
     context.fill();
     const flashing = this.flash > 0.2 && state.mechanisms.projection;
-    context.strokeStyle = flashing ? "#f4f1ea" : "#e8d59a";
-    context.lineWidth = 2.75;
-    context.shadowColor = flashing ? "rgba(255,255,255,0.85)" : "rgba(232,210,150,0.85)";
-    context.shadowBlur = 22;
+    context.strokeStyle = flashing ? "#f4f1ea" : "#ffe3a1";
+    context.lineWidth = 3.25;
+    context.shadowColor = flashing ? "rgba(255,255,255,0.85)" : "rgba(255,227,161,0.85)";
+    context.shadowBlur = 16;
     context.stroke();
     context.shadowBlur = 0;
 
@@ -294,17 +280,17 @@ export class FieldVisualizer {
       context.arc(0, 0, r, 0, TAU);
       if (enabled) {
         context.strokeStyle = "rgba(8,9,11,0.88)";
-        context.lineWidth = 3;
+        context.lineWidth = 5.5;
         context.stroke();
       }
       context.strokeStyle = enabled ? `rgba(${COLORS[i]},0.95)` : "rgba(197,204,214,0.14)";
-      context.lineWidth = enabled ? 2.4 : 1;
+      context.lineWidth = enabled ? 2.8 : 1;
       context.stroke();
       if (enabled) {
         context.beginPath();
         context.moveTo(0, -r - 3);
         context.lineTo(0, -r + 3);
-        context.lineWidth = 2.4;
+        context.lineWidth = 2.8;
         context.stroke();
       }
     });
@@ -318,32 +304,57 @@ export class FieldVisualizer {
         context.moveTo(point.x, point.y);
         context.lineTo(point.x + Math.cos(angle) * magnitude * radius * 0.42,
           point.y + Math.sin(angle) * magnitude * radius * 0.42);
-        context.strokeStyle = "rgba(196,165,116,0.85)";
-        context.lineWidth = 2;
+        context.strokeStyle = "rgba(242,191,103,0.95)";
+        context.lineWidth = 2.5;
         context.stroke();
       }
-      context.beginPath();
-      context.arc(point.x, point.y, 3.2, 0, TAU);
-      context.fillStyle = "#f3ead2";
-      context.fill();
+      drawFilledMarker(context, point, 5.5, "#fff1cc");
     }
 
+    // Draw the central data markers above the filled body and mechanism rings.
+    // Hollow references, blue summaries, and the neutral state locator retain
+    // their actual centroid positions even when several overlap.
+    if (state.mechanisms.projection) {
+      for (const basin of BASINS) {
+        const point = centroid(starPoints(basin.latent, radius));
+        context.beginPath();
+        context.arc(point.x, point.y, 7, 0, TAU);
+        context.strokeStyle = MARKER_OUTLINE;
+        context.lineWidth = 5;
+        context.stroke();
+        context.setLineDash([3, 3]);
+        context.strokeStyle = "rgba(242,191,103,0.95)";
+        context.lineWidth = 2;
+        context.stroke();
+        context.setLineDash([]);
+      }
+    }
     if (state.mechanisms.summaries) {
       for (const summary of state.summaries) {
         const point = centroid(starPoints(summary.latent, radius));
-        context.beginPath();
-        context.arc(point.x, point.y, 2.6, 0, TAU);
-        context.fillStyle = "rgb(142,160,184)";
-        context.fill();
+        drawFilledMarker(context, point, 5.5, "#8ab7ff");
       }
+    }
+    const lastTrail = state.trail.at(-1);
+    if (lastTrail) {
+      const point = centroid(starPoints(lastTrail, radius));
+      // A hollow locator leaves a coincident blue summary visible in its center.
+      context.beginPath();
+      context.arc(point.x, point.y, 4.5, 0, TAU);
+      context.strokeStyle = MARKER_OUTLINE;
+      context.lineWidth = 4;
+      context.stroke();
+      context.strokeStyle = "#f1f5ff";
+      context.lineWidth = 2;
+      context.stroke();
     }
 
     for (const mote of this.motes) {
       context.beginPath();
       context.arc(Math.cos(mote.angle) * mote.radius * radius * 1.28,
-        Math.sin(mote.angle) * mote.radius * radius * 1.28, 1.6, 0, TAU);
+        Math.sin(mote.angle) * mote.radius * radius * 1.28, 2.2, 0, TAU);
       context.fillStyle = state.mechanisms.noise
-        ? `rgba(196,137,122,${mote.life * 0.9})`
+        ? `rgba(255,149,125,${mote.life * 0.8})`
         : `rgba(197,204,214,${mote.life * 0.25})`;
       context.fill();
     }
