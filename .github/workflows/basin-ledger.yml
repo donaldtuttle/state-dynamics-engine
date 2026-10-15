@@ -7,6 +7,7 @@ on:
       - 'apps/simulator/**'
       - 'scripts/check-basin-ledger-browser.mjs'
       - 'scripts/check-field-view-browser.mjs'
+      - 'scripts/check-verification-browser.mjs'
   push:
     branches: [main]
     paths:
@@ -15,6 +16,7 @@ on:
       - 'apps/simulator/**'
       - 'scripts/check-basin-ledger-browser.mjs'
       - 'scripts/check-field-view-browser.mjs'
+      - 'scripts/check-verification-browser.mjs'
 permissions:
   contents: read
 jobs:
@@ -51,6 +53,7 @@ jobs:
           done
           NODE_PATH="$PWD/experiments/memory-policy-v3/node_modules" node scripts/check-basin-ledger-browser.mjs http://127.0.0.1:4173/simulator/ "$RUNNER_TEMP/ledger-evidence" 2>&1 | tee "$RUNNER_TEMP/ledger-evidence/browser.log"
           NODE_PATH="$PWD/experiments/memory-policy-v3/node_modules" node scripts/check-field-view-browser.mjs http://127.0.0.1:4173/simulator/ "$RUNNER_TEMP/ledger-evidence/field" 2>&1 | tee "$RUNNER_TEMP/ledger-evidence/field.log"
+          NODE_PATH="$PWD/experiments/memory-policy-v3/node_modules" node scripts/check-verification-browser.mjs http://127.0.0.1:4173/simulator/ "$RUNNER_TEMP/ledger-evidence/verification" 2>&1 | tee "$RUNNER_TEMP/ledger-evidence/verification.log"
           test -z "$(git status --porcelain)"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()

@@ -661,6 +661,10 @@ button {
   line-height: 1.55;
 }
 
+#check-context {
+  overflow-wrap: anywhere;
+}
+
 .trace-grid,
 .operator-grid,
 .verify-grid {
